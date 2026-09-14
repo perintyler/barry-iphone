@@ -1,0 +1,554 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		047A2A14D27389CCC5106EE3 /* BarrySocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BC5C87D15D36DA4B172502 /* BarrySocket.swift */; };
+		0EDAE32DFFDE33405B2239FF /* BarryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E69EBB984C4A02A753709F /* BarryApp.swift */; };
+		1FF0DBCCC316F9EB0EEF6730 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295E4CC1C22134DEBA7E815D /* Theme.swift */; };
+		428014EADD8008BE8FC57DC8 /* BarryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E905712AFEFC34CC590D4E /* BarryUITests.swift */; };
+		65A1CD081FB0E2BF89C752FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC997F223D9EBF2CACE43BC2 /* Assets.xcassets */; };
+		65D900EFA5D87CE2F52E5010 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B9960D55344A78CD3D51700 /* ChatStore.swift */; };
+		689BCE3FA7267B2649A7EA72 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367862B7C75C5757C631C2C4 /* Models.swift */; };
+		6EF62E6DC351C6BF30992A1D /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16573501A843EA0279C99C70 /* AppStore.swift */; };
+		6FC6298820C9475D95B72890 /* ServerConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A2BFB100BA9F0EF6437514 /* ServerConfig.swift */; };
+		742D443B33BB08EC6AED6953 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8360A0C12E8262F1FF7C1 /* SettingsView.swift */; };
+		A1702628A501CD85B2E965CD /* SessionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90719416ADE95C8796430FCC /* SessionsView.swift */; };
+		A923F7D232250DE735ACBE19 /* BarryClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426A0A5C30D5CD32D98FEFE0 /* BarryClient.swift */; };
+		D4C3BEC02506AC4AF6466CB2 /* ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82541CAA5B38B0BC4F4F7841 /* ModelsTests.swift */; };
+		D6F6C78DD558E450279C8CCD /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C626925C7F4E3F562020EE /* ChatView.swift */; };
+		E3E90F94DBF145CE041A71AA /* MessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */; };
+		F20E64A06D8C172F9651AA33 /* NewSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4866CB2DD44AE19329A0BC89 /* NewSessionView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0E67AEE147A88AFFDEC06F3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 62926B13FC503987447CF5E6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5876656BFCB39671113D6441;
+			remoteInfo = Barry;
+		};
+		D0F059285E72560196235C86 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 62926B13FC503987447CF5E6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5876656BFCB39671113D6441;
+			remoteInfo = Barry;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		03E69EBB984C4A02A753709F /* BarryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarryApp.swift; sourceTree = "<group>"; };
+		0AB1843FA0431EC1E29810D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		0B9960D55344A78CD3D51700 /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
+		16573501A843EA0279C99C70 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		295E4CC1C22134DEBA7E815D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageRow.swift; sourceTree = "<group>"; };
+		367862B7C75C5757C631C2C4 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		37C626925C7F4E3F562020EE /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		40C8360A0C12E8262F1FF7C1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		426A0A5C30D5CD32D98FEFE0 /* BarryClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarryClient.swift; sourceTree = "<group>"; };
+		4866CB2DD44AE19329A0BC89 /* NewSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSessionView.swift; sourceTree = "<group>"; };
+		56BC5C87D15D36DA4B172502 /* BarrySocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarrySocket.swift; sourceTree = "<group>"; };
+		711E43480463B0F36F74E35A /* Barry.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Barry.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		82541CAA5B38B0BC4F4F7841 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsTests.swift; sourceTree = "<group>"; };
+		90719416ADE95C8796430FCC /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
+		914915E267DDB87BAB23CD51 /* BarryTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BarryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A7E905712AFEFC34CC590D4E /* BarryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarryUITests.swift; sourceTree = "<group>"; };
+		AC997F223D9EBF2CACE43BC2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E1A2BFB100BA9F0EF6437514 /* ServerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConfig.swift; sourceTree = "<group>"; };
+		F08AB4623C5D33768E74DF13 /* BarryUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BarryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		11C8B6E5BDD22AFCB3606E67 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				16573501A843EA0279C99C70 /* AppStore.swift */,
+				AC997F223D9EBF2CACE43BC2 /* Assets.xcassets */,
+				03E69EBB984C4A02A753709F /* BarryApp.swift */,
+				426A0A5C30D5CD32D98FEFE0 /* BarryClient.swift */,
+				56BC5C87D15D36DA4B172502 /* BarrySocket.swift */,
+				0B9960D55344A78CD3D51700 /* ChatStore.swift */,
+				0AB1843FA0431EC1E29810D3 /* Info.plist */,
+				367862B7C75C5757C631C2C4 /* Models.swift */,
+				E1A2BFB100BA9F0EF6437514 /* ServerConfig.swift */,
+				295E4CC1C22134DEBA7E815D /* Theme.swift */,
+				FB7954E28A2CF218A4DC7A93 /* Views */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		144940AA3FCBEC48E8C1E9A7 /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				A7E905712AFEFC34CC590D4E /* BarryUITests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+		458F69C49FA512C6804698F5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				711E43480463B0F36F74E35A /* Barry.app */,
+				914915E267DDB87BAB23CD51 /* BarryTests.xctest */,
+				F08AB4623C5D33768E74DF13 /* BarryUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7EC2F4433082FD00C5B6F0BA = {
+			isa = PBXGroup;
+			children = (
+				11C8B6E5BDD22AFCB3606E67 /* App */,
+				B3D1C2A5B0D9F47640EFC9F8 /* Tests */,
+				144940AA3FCBEC48E8C1E9A7 /* UITests */,
+				458F69C49FA512C6804698F5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B3D1C2A5B0D9F47640EFC9F8 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				82541CAA5B38B0BC4F4F7841 /* ModelsTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		FB7954E28A2CF218A4DC7A93 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				37C626925C7F4E3F562020EE /* ChatView.swift */,
+				2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */,
+				4866CB2DD44AE19329A0BC89 /* NewSessionView.swift */,
+				90719416ADE95C8796430FCC /* SessionsView.swift */,
+				40C8360A0C12E8262F1FF7C1 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5876656BFCB39671113D6441 /* Barry */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB737F80D8DCFF962B9BD6E1 /* Build configuration list for PBXNativeTarget "Barry" */;
+			buildPhases = (
+				8CDDC51BB498D44906A8F13B /* Sources */,
+				F647D916B531A4C4F3C4E254 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Barry;
+			packageProductDependencies = (
+			);
+			productName = Barry;
+			productReference = 711E43480463B0F36F74E35A /* Barry.app */;
+			productType = "com.apple.product-type.application";
+		};
+		88FF630589CD00EF0439E5AC /* BarryUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F60F63B0ECF0B3B2A36BB830 /* Build configuration list for PBXNativeTarget "BarryUITests" */;
+			buildPhases = (
+				3E5A1E3EDD1E918DB440FCA4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ED8A7F572EF6F2BE803D2D5B /* PBXTargetDependency */,
+			);
+			name = BarryUITests;
+			packageProductDependencies = (
+			);
+			productName = BarryUITests;
+			productReference = F08AB4623C5D33768E74DF13 /* BarryUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		AB3A268187AB106F4438FF00 /* BarryTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 934042CBB656E6181E81C3C4 /* Build configuration list for PBXNativeTarget "BarryTests" */;
+			buildPhases = (
+				0E93E47B5B589E2976478411 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2C480611AA8693C67625048C /* PBXTargetDependency */,
+			);
+			name = BarryTests;
+			packageProductDependencies = (
+			);
+			productName = BarryTests;
+			productReference = 914915E267DDB87BAB23CD51 /* BarryTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		62926B13FC503987447CF5E6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					88FF630589CD00EF0439E5AC = {
+						TestTargetID = 5876656BFCB39671113D6441;
+					};
+				};
+			};
+			buildConfigurationList = 925CF8682685D2DB32E2BA78 /* Build configuration list for PBXProject "Barry" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7EC2F4433082FD00C5B6F0BA;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 458F69C49FA512C6804698F5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5876656BFCB39671113D6441 /* Barry */,
+				AB3A268187AB106F4438FF00 /* BarryTests */,
+				88FF630589CD00EF0439E5AC /* BarryUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F647D916B531A4C4F3C4E254 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				65A1CD081FB0E2BF89C752FE /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0E93E47B5B589E2976478411 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4C3BEC02506AC4AF6466CB2 /* ModelsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E5A1E3EDD1E918DB440FCA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				428014EADD8008BE8FC57DC8 /* BarryUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8CDDC51BB498D44906A8F13B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6EF62E6DC351C6BF30992A1D /* AppStore.swift in Sources */,
+				0EDAE32DFFDE33405B2239FF /* BarryApp.swift in Sources */,
+				A923F7D232250DE735ACBE19 /* BarryClient.swift in Sources */,
+				047A2A14D27389CCC5106EE3 /* BarrySocket.swift in Sources */,
+				65D900EFA5D87CE2F52E5010 /* ChatStore.swift in Sources */,
+				D6F6C78DD558E450279C8CCD /* ChatView.swift in Sources */,
+				E3E90F94DBF145CE041A71AA /* MessageRow.swift in Sources */,
+				689BCE3FA7267B2649A7EA72 /* Models.swift in Sources */,
+				F20E64A06D8C172F9651AA33 /* NewSessionView.swift in Sources */,
+				6FC6298820C9475D95B72890 /* ServerConfig.swift in Sources */,
+				A1702628A501CD85B2E965CD /* SessionsView.swift in Sources */,
+				742D443B33BB08EC6AED6953 /* SettingsView.swift in Sources */,
+				1FF0DBCCC316F9EB0EEF6730 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2C480611AA8693C67625048C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5876656BFCB39671113D6441 /* Barry */;
+			targetProxy = 0E67AEE147A88AFFDEC06F3E /* PBXContainerItemProxy */;
+		};
+		ED8A7F572EF6F2BE803D2D5B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5876656BFCB39671113D6441 /* Barry */;
+			targetProxy = D0F059285E72560196235C86 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		233086F269110B6A973E34E5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.10;
+			};
+			name = Debug;
+		};
+		49047E49520AEF61FC95AD2E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = rocks.barry.BarryUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Barry;
+			};
+			name = Debug;
+		};
+		685B081F0C60FE105A3789FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = rocks.barry.BarryTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Barry.app/Barry";
+			};
+			name = Release;
+		};
+		ADB2A63E7E19AEDA6A335DC7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = rocks.barry.Barry;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		BE7CC6681020BA8A54222839 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = rocks.barry.BarryTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Barry.app/Barry";
+			};
+			name = Debug;
+		};
+		E341511182ACEE9328D562A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.10;
+			};
+			name = Release;
+		};
+		FD7E0B6FEC7ACAB239FDCA07 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = rocks.barry.BarryUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Barry;
+			};
+			name = Release;
+		};
+		FE7C58C1BF6A78F5847FC70A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = rocks.barry.Barry;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		925CF8682685D2DB32E2BA78 /* Build configuration list for PBXProject "Barry" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				233086F269110B6A973E34E5 /* Debug */,
+				E341511182ACEE9328D562A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		934042CBB656E6181E81C3C4 /* Build configuration list for PBXNativeTarget "BarryTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE7CC6681020BA8A54222839 /* Debug */,
+				685B081F0C60FE105A3789FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F60F63B0ECF0B3B2A36BB830 /* Build configuration list for PBXNativeTarget "BarryUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				49047E49520AEF61FC95AD2E /* Debug */,
+				FD7E0B6FEC7ACAB239FDCA07 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FB737F80D8DCFF962B9BD6E1 /* Build configuration list for PBXNativeTarget "Barry" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FE7C58C1BF6A78F5847FC70A /* Debug */,
+				ADB2A63E7E19AEDA6A335DC7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 62926B13FC503987447CF5E6 /* Project object */;
+}
