@@ -68,7 +68,7 @@ struct NewSessionView: View {
         defer { creating = false }
         do {
             let session = try await store.client.createDraft(
-                repoPath: repoPath, name: nil, provider: nil, model: nil
+                repoPath: repoPath, systemPrompt: prompt, name: nil, provider: nil, model: nil
             )
             try await store.client.sendMessage(sessionId: session.id, content: prompt)
             await store.refreshSessions()

@@ -149,4 +149,30 @@ final class LiveAPITests: XCTestCase {
         let repos = try await BarryClient(config: config).repos()
         XCTAssertFalse(repos.isEmpty)
     }
+
+    /// Regression: createDraft() omitted `systemPrompt`, which the server
+    /// requires (non-empty string) — every draft-session creation 400'd in
+    /// the field with "systemPrompt: Invalid input: expected string,
+    /// received undefined", caught only by hand-testing on a real device
+    /// because no test exercised the actual network call. This creates one
+    /// real (harmless, self-archiving) session end-to-end to close that gap.
+    func testCreatesDraftSessionEndToEnd() async throws {
+        try await requireServer()
+        let client = BarryClient(config: config)
+        guard let repo = try await client.repos().first else {
+            throw XCTSkip("no repos configured")
+        }
+        let session = try await client.createDraft(
+            repoPath: repo.path,
+            systemPrompt: "iOS integration test — safe to ignore/archive",
+            name: "ios-test-\(Int(Date().timeIntervalSince1970))",
+            provider: nil,
+            model: nil
+        )
+        XCTAssertFalse(session.id.isEmpty)
+        // Clean up: this test's purpose is to exercise the network call and
+        // its request shape, not to leave a session behind for a human to
+        // notice and wonder about.
+        try? await client.archiveSession(id: session.id)
+    }
 }

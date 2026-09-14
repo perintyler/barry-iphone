@@ -100,8 +100,13 @@ struct BarryClient {
     }
 
     /// Create a draft session; returns the new session.
-    func createDraft(repoPath: String, name: String?, provider: String?, model: String?) async throws -> Session {
-        var body: [String: Any] = ["repoPath": repoPath]
+    ///
+    /// `systemPrompt` is REQUIRED by the server (non-empty string) even
+    /// though this app never surfaces "system prompt" as its own concept —
+    /// callers pass the user's first message here. The draft starts inert;
+    /// a follow-up `sendMessage` is what actually kicks the session off.
+    func createDraft(repoPath: String, systemPrompt: String, name: String?, provider: String?, model: String?) async throws -> Session {
+        var body: [String: Any] = ["repoPath": repoPath, "systemPrompt": systemPrompt]
         if let name, !name.isEmpty { body["name"] = name }
         if let provider, !provider.isEmpty { body["provider"] = provider }
         if let model, !model.isEmpty { body["model"] = model }
