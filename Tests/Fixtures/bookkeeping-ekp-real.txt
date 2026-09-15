@@ -1,0 +1,704 @@
+### 2026-09-14 21:13
+
+### Done
+✅ rename-scope-to-bound recovered on its own (ref changed 133981 → 2f84c8)
+✅ barry-e4 → barry-63 recovered on its own
+✅ barry-9d → barry-b1 fixed by restart
+
+### What went right
+- All sessions verified via schema load
+- No loose work detected
+- Filesystem MCP reconnected without issues
+
+### What went wrong
+- None
+
+### Open loops
+- Two large vocabulary renames pending: `rename-scope-to-bound` and `barry-9d` (park vs finish)
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 21:31
+
+### Done
+- Fixed 17 broken imports in `rename-scope-to-bound` worktree
+- Verified compile with `pnpm -r typecheck` (EXIT=0, 0 TS errors)
+- Committed as e492ce80
+
+### Learnings
+- BSD sed silently ignores \b word boundaries
+- Renamed package exports require symbol updates (AgentScope→AgentBound)
+- Workspace re-linking via `pnpm install` needed after rename
+
+### What went right
+- Independent verification of compile state
+- Clear commit message for the fix
+- 0 unpushed commits in `barry-05`
+
+### What went wrong
+- Initial typecheck failed with 3 TS2307 errors
+- Worktree had 17 files still importing old package
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 22:03
+
+### Done
+- Fixed `ModelInfoSchema` to include `note` field
+- Fixed 17 broken imports in `rename-scope-to-bound` worktree
+- Landed F7+F8 (execution admission + Codex turn cancellation) on master
+- Verified F9-F11 overlap with rename-scope-to-bound is mechanical (import path change only)
+
+### Learnings
+- The collision was mechanical, not semantic: only import path changed in F9-F11 files
+- Direct inspection of diffs is more reliable than file list analysis
+
+### What went right
+- Git status showed clean state after reset
+- F9-F11 files only required import path update
+- Tyler's go-ahead allowed smooth progression
+
+### What went wrong
+- Initial assumption about collision was incorrect
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 22:19
+
+### Done
+- Fixed local lint gate failures by removing temporary files from release staging
+- Tagged release/prod/0.8.3
+- Verified all 7 CI jobs succeeded
+
+### Learnings
+- Scratch files leak into release staging
+- Local lint gate catches untracked files
+
+### What went right
+- Cleaned up staging directory before release
+- CI jobs ran without errors
+
+### What went wrong
+- Initial lint check failed due to tmp/picker-mockup/compare.ts
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 22:37
+
+### Done
+`npx eslint . --max-warnings=0` with 900s timeout passed cleanly (exit 0)
+
+### What went right
+- Verified gate green without ignore flags or workarounds
+- Confirmed `tmp/` contents don't affect gate
+
+### What went wrong
+- Initial run would have timed out on 540s (exit 124)
+- `tmp/` files were previously causing false positives
+
+### Open loops
+- `tmp/` cleanup policy for gate stability
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 22:53
+
+### Done
+- Verified `fe660b73` commit on master (0 unpushed)
+- Stale-tree artifact matched landed range (5 entries)
+- Gates green: contracts, knip, security, lint
+
+### Learnings
+- Self-review caught skipped `connection-leases.ts` in F9-F11 commit
+- First design attempt was wrong-layer (route-level vs. BagConnectionPool)
+
+### What went right
+- No gate finds skipped files (repo perspective is clean)
+- Corrected fix in `BagConnectionPool` (90s settle-grace + connection-leases.ts)
+
+### What went wrong
+- Initial design tried reserving pool keys at route level
+- Skipped `connection-leases.ts` in commit (caught via plan text review)
+
+### Open loops
+- F16: Push to `bags/metrics` remote explicitly
+- F13/F14: Use `swift build && swift test` for evidence
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 23:40
+
+### Done
+- Tagged `release/prod/0.8.4` on GitHub
+- All 7 CI lanes green for release
+- Verified `barry --version` runs in 1.5s
+
+### Learnings
+- F18 fix dedupes MCP server connections by resolved ownership
+- Freshly-connected bags no longer pruned mid-connect
+
+### What went right
+- CI tests passed without workarounds
+- Tree clean after release
+- Negative controls verified on both sub-fixes
+
+### What went wrong
+- None
+
+### Open loops
+- F15 (SQLite off event loop) deferred for Swift/F16 (metrics) work
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 23:56
+
+### Done
+- Verified `bags/sessions/sessions-macos/app/QA.md` exists (568 lines) with numbered steps up to 24
+- Confirmed F16's target repo (`bags/metrics`) is clean and greenfield
+- Checked canary version in shipped mirror matches `0.8.4-0d229442`
+- Validated F12 fix (`0d229442`) is in production release
+
+### What went right
+- QA.md steps were well-established and followed the `### N. Title` format
+- F16 repo was clean with no unpushed changes
+- Mirror checks confirmed correct version and F12 fix
+
+### What went wrong
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 00:27
+
+### Done
+- Fixed import that broke fresh clone by updating `src/markdown-to-slack-blocks` to import `@barry/tools` correctly
+- Committed 14 files with commit `a45d774`
+- Verified fresh clone works: 0 broken imports, 12 converter files
+
+### Learnings
+- The broken import was invisible in previous state: messages kept sending with worse formatting
+- Fresh clone test is critical for package dependencies
+
+### What went right
+- Single commit resolved the issue without breaking existing functionality
+- Tests passed for the new converter
+
+### What went wrong
+- Initial typecheck failed due to missing `typecheck` command
+- Temporary fix for broken import was needed
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 01:00
+
+### Done
+`stage2-namespace-to-grants-wip` rebased onto master `26a7323f` (5af244bc) with 0 conflicts, 19-20 commits, 5 ahead/1 behind. Conflicts resolved in `servers/mcp/src/index.ts` (benign).
+
+### Learnings
+Rebase in a throwaway worktree to avoid disrupting others' uncommitted work. Verified shared tree integrity after rebase.
+
+### What went right
+- Clean rebase with no conflicts
+- Conflicts resolved without breaking functionality
+- Verified shared tree state after rebase
+
+### What went wrong
+- Uncommitted work from another session (`cli/src/prompts/trait-picker.ts` etc.) found in shared tree
+
+### Open loops
+- `barry-63` needs to commit their uncommitted work before stage 2 ships
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 01:16 ⚠️ TOPIC CHANGE
+
+Was agent-scope parser fix; now scope-to-bound rename migration.
+
+### Done
+- Verified migration 028 applied without collision
+- Confirmed `settings.scope` preserved in live schema
+- Token prefix frozen at 'scp'
+- `pnpm migrate` refused prod database
+
+### Learnings
+- The prod guard catches prod databases
+- Scope→Bound rename is idempotent
+
+### What went right
+- Live schema checks confirmed
+- Negative control tests worked
+
+### What went wrong
+- None
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 01:32
+
+### Done
+`ce9bde5d` re-landed as `78526cf0` on `origin/master` with all 3 picker files present
+
+### What went right
+- `git merge-base --is-ancestor` confirmed `78526cf0` is an ancestor of `origin/master`
+- SwiftLint file (`PlistCacheTests.swift`) remained staged and untouched
+- `barry-6a`'s method avoided `git stash` and potential file loss
+
+### What went wrong
+- `barry-05` used stale `master` ref (read before commit)
+- `git rev-parse` on `master` showed `ce9bde5d` as parent, but actual parent was `26a7323f`
+- `cherry-pick` would have created duplicate commit
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 01:50
+
+### Done
+- Released 0.8.6 to production
+- Verified 7 CI lanes green
+- Confirmed no leaks in staging directory
+
+### Learnings
+- The `scope-summary.ts` rename caused a CLI breakage that typecheck missed
+- This is the fifth consecutive clean release
+
+### What went right
+- `pnpm -r typecheck` caught 4 compiler blind spots
+- Seed.ts route verification confirmed by source
+
+### What went wrong
+- None
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 02:36 ⚠️ TOPIC CHANGE
+
+Was agent-scope parser fix; now status check.
+
+### Done
+
+### Learnings
+
+### What went right
+
+- `git fetch` confirmed clean state with zero unreleased commits
+- 0.8.6 released to production with all CI lanes green
+
+### What went wrong
+
+### Open loops
+
+- `rename-scope-to-bound` feature still in progress (9 commits, 1 behind master)
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 02:52 ⚠️ TOPIC CHANGE
+
+Was agent-scope parser fix; now fix transcript SSE correctness bugs.
+
+### Done
+- `git merge-base --is-ancestor 35e749a4 origin/master` → exit 0
+- Artifact matched landed range exactly
+- Clean tree after `git reset && git checkout -- .`
+
+### Learnings
+- The ritual of `merge-base` checks prevents silent merges on stale input
+- Backpressure handling in SSE streams requires mid-loop validation
+
+### What went right
+- `git reset` cleared in-flight work without affecting committed changes
+- Swift checks passed for all components
+
+### What went wrong
+- Initial diff truncation masked the functional change (gap halved)
+- In-flight work could have been a risk without the `merge-base` check
+
+### Open loops
+- SR4 covers 4 bugs but backpressure test shows new failure variant
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 03:09
+
+### Done
+- Fixed double assertions in transcript stream via `TickingTail` interface
+- Landed commit `a5e233a9`
+- Verified with `npx eslint . --max-warnings=0` (root gate)
+- Passed all CI lanes for release 0.8.7
+
+### Learnings
+- Structural typing (plain object literals) satisfies interfaces without assertions
+- `TickingTail` interface reduces coupling by narrowing parameter types
+
+### What went right
+- `git merge-base` confirmed ancestry
+- All 7 CI lanes green for 0.8.7
+- No double assertions remain in HEAD
+
+### What went wrong
+- None
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 03:24 ⚠️ TOPIC CHANGE
+
+Was agent-scope parser fix; now fixing database migration conflicts in barry_test.
+
+### Done
+`npx vitest run sessions.test` passes from shared master checkout
+
+### What went right
+- Verified migration conflict is worktree-local, not machine-wide
+- Confirmed 029_sessions_search_text.sql is pending but not in barry_test
+
+### What went wrong
+- Initial claim suggested global block, but actual issue is worktree-specific
+- Migration 029 not on master yet
+
+### Open loops
+- Need to apply 029 to barry_test or rebuild from master
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 03:56
+
+### Done
+- Verified `servers/api`, `servers/mcp`, and `cli` have no `typecheck` script
+- Confirmed `pnpm -r typecheck` skips 3 packages (out of 52 workspace entries)
+- Found CI covers these packages via `build:projects` (exit 0)
+
+### Learnings
+- `pnpm -r typecheck` silently skips packages without typecheck scripts
+- The 3 central packages are project references but not typechecked by the root script
+
+### What went right
+- `git merge-base` confirmed rebase state
+- `tsconfig.projects.json` lists all 3 packages
+
+### What went wrong
+- Miscounted 53 errors as uncaught (CI actually covers them)
+
+### Open loops
+- Clarify why `build:projects` typechecks these packages
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 04:15
+
+### Done
+- Fixed 53 type errors via `rename-scope-to-bound` branch
+- Verified OpenAPI artifacts in one commit (106 lines each)
+- Confirmed SwiftLint warnings: 113 on branch vs master
+
+### Learnings
+- Type errors were invisible due to inline response objects
+- Shell substitution hazards require explicit checks
+
+### What went right
+- SwiftLint baseline method correctly tracked warning counts
+- OpenAPI regeneration didn't break existing contracts
+
+### What went wrong
+- Initial `typecheck` skipped central packages
+
+### Open loops
+- Need to verify `BarryTransport.swift` after renaming
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 04:31 ⚠️ TOPIC CHANGE
+
+Was agent-scope parser fix; now checking for recent changes.
+
+### Done
+- Verified `8b2bc14d` (point-guard crash recovery) is in master
+- Checked `scope→bound` is 12 commits ahead, 0 behind
+- Confirmed vault healthy for 12 hours
+
+### Learnings
+- Sessions catch each other's mistakes
+- Consecutive green releases (0.8.1–0.8.7) are stable
+
+### What went right
+- Master clean with no broken releases
+- Vault health confirmed
+
+### What went wrong
+- None
+
+### Open loops
+- Verify point-guard session is in plan mode
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 05:07
+
+### Done
+- Fixed 53 type errors via `rename-scope-to-bound` branch
+- Verified `8b2bc14d` (point-guard crash recovery) is in master
+
+### Learnings
+- The iPhone app uses Caddy on port 80 with Host header routing, not direct API calls
+- Stale IP was the only issue, not port binding
+
+### What went right
+- Correctly identified that loopback-only API bind is design choice
+- Quickly resolved confusion with port testing
+
+### What went wrong
+- Initial port test was misaligned with actual app configuration
+
+### Open loops
+- Tyler needs active management for scope renames to land
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 05:27 ⚠️ TOPIC CHANGE
+
+Was agent-scope parser fix; now resolving name collisions in active sessions.
+
+### Done
+
+- Verified `rename-scope-to-bound` worktree has no overlap with `actions.ts`
+- Confirmed `barry-63 [e956a9]` has no namespace→grants overlap
+- Cleared `barry-63` session for identity-scoped action catalog
+
+### Learnings
+
+- Session names can be shared across active sessions
+- Worktrees are critical for isolated work
+
+### What went right
+
+- `ListAgents` showed all active sessions with clear identities
+- `git log` revealed uncommitted changes in `migrate.ts`
+
+### What went wrong
+
+- Initial name collisions caused confusion
+- Multiple sessions sharing the same name without clear ownership
+
+### Open loops
+
+- Need to coordinate worktree usage across sessions
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 05:48
+
+### Done
+- Verified Caddy is on `*:80` with 200 responses over Tailscale
+- Confirmed `rename-scope-to-bound` branch at Stage 4 (docs + guard green)
+- Fixed stray `vi.mock` reference in old Blocks→Bags check
+- Held sandbox test for MCP restart
+- Sent 10-min check-in to self via Slack
+
+### Learnings
+- The failing guard was pre-existing (old Blocks→Bags check)
+- Rename branch doesn't touch the affected files
+- MCP restart requires coordination with active sessions
+
+### What went right
+- Precise state checks before action
+- Clear distinction between old/new guards
+- Timely correction of mock file issue
+
+### What went wrong
+- Initial confusion about guard status
+- Temporary misalignment on branch landing status
+
+### Open loops
+- 5 unreleased commits (will stay paused)
+- 2 sessions named `barry-63` need monitoring
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 06:06 ⚠️ TOPIC CHANGE
+
+Was agent-scope parser fix; now verifying phone session landing and vault cutover.
+
+### Done
+- Verified `phone-message-active-session` landed via `git merge-base` (ancestor: `b6fc48a8`)
+- Fast-forwarded local master to `b6fc48a8`
+- Confirmed no stale artifacts (staged: 0)
+- Cleared `rename-scope-to-bound` session with rebase targets
+
+### Learnings
+- Landed sessions require explicit ancestry checks, not just branch names
+- Fast-forwarding resolves conflicts without merging
+
+### What went right
+- `git merge-base` correctly identified landing
+- Vault container was healthy (13 hours)
+
+### What went wrong
+- Could not message `retire-apps-web-vault` (agent not reachable)
+
+### Open loops
+- Vault cutover branch has 5 commits ahead of master
+- Need to resolve vault cutover blockages per Tyler's request
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 06:25
+
+### Done
+- Rebased `rename-scope-to-bound` onto `b6fc48a8` (0 behind, 13 ahead)
+- Resolved two conflicts in `planned-sessions.ts` and `test.ts`
+- Reapplied Stage 3c edits after conflict resolution
+
+### Learnings
+- Conflict resolution requires independent file checks (not just conflict markers)
+- Rebase can silently revert changes if not verified
+
+### What went right
+- Found the conflict source via grep on file bodies
+- Corrected the triage by verifying the test failure wasn't on master
+
+### What went wrong
+- Initial rebase reverted Stage 3c edits to two files
+- Plans-iphone work broke `barry`'s test run
+
+### Open loops
+- Plans-iphone directory exists but isn't in committed manifest
+- Need to confirm if `plans-iphone` is safe for vault cutover
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 06:42
+
+### Done
+- Rebuilt MCP bundle (`b4c652e7`) with `pnpm --filter @barry-rocks/mcp-server build:http` (5.7 MB)
+- Verified `com.barry.api` restarted
+- Confirmed `/bounds` returns 500 (expected)
+
+### What went right
+- Clean workspace after removing stale `agent-scope` artifacts
+- Bundle rebuild completed without errors
+- Migration state: 25 applied (025_provider_sessions_ollama.sql)
+
+### What went wrong
+- DB SSL mode error: `invalid sslmode value: "require` (from `com.barry.api.plist`)
+- `resolveSessionBound` function exists but not yet tested for errors
+
+### Open loops
+- Verify `resolveSessionBound` handles errors
+- Fix DB SSL configuration
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 07:19
+
+### Done
+- Verified `point-guard` commits (5ea3802a, 8b2bc14d, 4bf27c57) are in `rename-scope-to-bound` worktree
+- Confirmed `ec570e5b` (retire questions API) is clean FF from `master` (50d4be3d)
+- Checked 10 files changed in `ec570e5b` (bags/system/bag.yaml, packages/BarryKit/Sources/openapi.yaml, etc.)
+
+### Learnings
+- `point-guard` has 3 recent commits related to vault and execution
+- `ec570e5b` is a clean fast-forward commit with no conflicts
+
+### What went right
+- Git commands correctly identified the commit state
+- Vault CUTOVER.md mentions were found in relevant repos
+
+### What went wrong
+- Worktree path resolution failed initially (no such file)
+
+### Open loops
+- Confirming vault CUTOVER.md mentions are correctly handled
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 07:37
+
+### Done
+- Verified 13 sessions via socket (11 reached, 2 gaps)
+- Switched from name-based to branch+commit content for session identification
+- Confirmed `barry-60` was blocked on 4 questions
+
+### Learnings
+- Names collide in session supervision (e.g., two `barry-63`s)
+- Branch and commit content uniquely identify sessions
+
+### What went right
+- Socket communication worked for all 13 sessions
+- `recordSessionUsage` callers identified correctly
+
+### What went wrong
+- Initial name-based approach missed sessions due to collisions
+- `barry-60` was blocked on in-channel questions
+
+### Open loops
+- `barry-60` needs resolution for 4 questions
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 07:56
+
+### Done
+- Sent team check-in to all active sessions via uds socket
+- Verified `a7d58d21` landed in `plans` repo (4 unpushed commits)
+- Confirmed `migrate-prefixes.test.ts` is in history at `dc7dd4e6`
+
+### Learnings
+- Tyler approved `point-guard` implementation
+- Vault session is retiring container
+- `a7d58d21` fixes usage-telemetry without schema risk
+
+### What went right
+- All sessions reported status without blocking
+- `git status` showed no uncommitted changes in `plans` repo
+- `migrate-prefixes.test.ts` was verified as landed
+
+### What went wrong
+- None
+
+### Open loops
+- Waiting for user questions via `user question tool`
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 08:15
+
+### Done
+- Reproduced scope column error in `barry` with `session list` (exit 0)
+- Verified `sessions.store` service is running (pid 87435)
+- Confirmed `questions` service health (200)
+
+### Learnings
+- `session list` fails with `unknown option '--limit'` when run without `--limit` flag
+- `git checkout HEAD --` doesn't modify files when missing target
+
+### What went right
+- Correctly identified exit code 1 from `git checkout`
+- Verified all bag services are running with health checks
+
+### What went wrong
+- `session list` command failed unexpectedly due to missing `--limit` flag
+- Initial exit code 0 was misleading for error state
+
+### Open loops
+- Need to fix `session list` to handle `--limit` correctly
+
+<!-- model: qwen3:4b -->

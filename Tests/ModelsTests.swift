@@ -323,4 +323,28 @@ final class LiveAPITests: XCTestCase {
             XCTAssertFalse(file.displayName.isEmpty)
         }
     }
+
+    /// Fetches REAL sessions from the live API and confirms
+    /// `BookkeepingParser` handles a real, substantial `summary` field
+    /// without crashing. Searches a page of real sessions for one with a
+    /// long-enough summary to contain multiple ledger entries -- skips,
+    /// rather than fails, if none currently qualify, since summary length
+    /// is a property of what's been running on this machine, not of this
+    /// app.
+    func testFetchesAndParsesRealBookkeepingSummary() async throws {
+        try await requireServer()
+        let client = BarryClient(config: config)
+        let page = try await client.sessions(limit: 50)
+        guard let session = page.sessions.first(where: { ($0.summary?.count ?? 0) > 2000 }) else {
+            throw XCTSkip("no session currently has a substantial bookkeeping summary")
+        }
+        let entries = BookkeepingParser.parse(session.summary)
+        XCTAssertGreaterThan(entries.count, 1, "a >2000 char real summary should contain multiple ledger entries")
+        for entry in entries {
+            XCTAssertFalse(entry.timestampRaw.isEmpty)
+            if entry.isDrift {
+                XCTAssertNotNil(entry.driftDescription, "a drift-flagged real entry should carry a description")
+            }
+        }
+    }
 }

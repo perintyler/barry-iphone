@@ -13,8 +13,11 @@
 		0EDAE32DFFDE33405B2239FF /* BarryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E69EBB984C4A02A753709F /* BarryApp.swift */; };
 		0FF7249D795CF44D2C0EEA17 /* TraitPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF45E6BCC1D548B8E4F42443 /* TraitPickerView.swift */; };
 		1FF0DBCCC316F9EB0EEF6730 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295E4CC1C22134DEBA7E815D /* Theme.swift */; };
+		2765C90EB84E30208A44DFF4 /* BookkeepingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC9E092EA39C9681089DAF8 /* BookkeepingView.swift */; };
 		2E5042D78A35F90AE439F967 /* ModelPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7E99C95867D5B1AAC8D1096 /* ModelPickerView.swift */; };
+		3A310CA16EA3B94B16FC22F9 /* BookkeepingParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8614F12198C2E98DBF83C241 /* BookkeepingParserTests.swift */; };
 		428014EADD8008BE8FC57DC8 /* BarryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E905712AFEFC34CC590D4E /* BarryUITests.swift */; };
+		52DC91CE432DC9BF6C366A37 /* bookkeeping-ekp-real.txt in Resources */ = {isa = PBXBuildFile; fileRef = 179AB3AA1453CDAAE5967A8F /* bookkeeping-ekp-real.txt */; };
 		65A1CD081FB0E2BF89C752FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC997F223D9EBF2CACE43BC2 /* Assets.xcassets */; };
 		65D900EFA5D87CE2F52E5010 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B9960D55344A78CD3D51700 /* ChatStore.swift */; };
 		689BCE3FA7267B2649A7EA72 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367862B7C75C5757C631C2C4 /* Models.swift */; };
@@ -25,9 +28,11 @@
 		A923F7D232250DE735ACBE19 /* BarryClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426A0A5C30D5CD32D98FEFE0 /* BarryClient.swift */; };
 		B1F802D5785FEE52B803AD82 /* DiffParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2CAB0018F2A48BF0CF9405C /* DiffParserTests.swift */; };
 		C85A3C0B22CB2DD9A6AA3042 /* uncommitted-real.diff in Resources */ = {isa = PBXBuildFile; fileRef = E0783053B0A9BBD99C908B1F /* uncommitted-real.diff */; };
+		D0D7644BC15A29D76FFBC55E /* BookkeepingParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D157E513972A66B31E93AA /* BookkeepingParser.swift */; };
 		D1FA2B9FF8C8441C633C6148 /* DiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08734282A228AB98498A663F /* DiffView.swift */; };
 		D4C3BEC02506AC4AF6466CB2 /* ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82541CAA5B38B0BC4F4F7841 /* ModelsTests.swift */; };
 		D6F6C78DD558E450279C8CCD /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C626925C7F4E3F562020EE /* ChatView.swift */; };
+		DAB804FD47720AD84D63AC89 /* bookkeeping-kpd-real.txt in Resources */ = {isa = PBXBuildFile; fileRef = 71393308DC71BFEA688E6D9E /* bookkeeping-kpd-real.txt */; };
 		DDA13FCE298258FAE8138754 /* DiffParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F90CD55FF9CB859395CFD38E /* DiffParser.swift */; };
 		E3E90F94DBF145CE041A71AA /* MessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */; };
 		F20E64A06D8C172F9651AA33 /* NewSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4866CB2DD44AE19329A0BC89 /* NewSessionView.swift */; };
@@ -56,6 +61,7 @@
 		0AB1843FA0431EC1E29810D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0B9960D55344A78CD3D51700 /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
 		16573501A843EA0279C99C70 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		179AB3AA1453CDAAE5967A8F /* bookkeeping-ekp-real.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "bookkeeping-ekp-real.txt"; sourceTree = "<group>"; };
 		295E4CC1C22134DEBA7E815D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageRow.swift; sourceTree = "<group>"; };
 		367862B7C75C5757C631C2C4 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -63,9 +69,12 @@
 		40C8360A0C12E8262F1FF7C1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		426A0A5C30D5CD32D98FEFE0 /* BarryClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarryClient.swift; sourceTree = "<group>"; };
 		4866CB2DD44AE19329A0BC89 /* NewSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSessionView.swift; sourceTree = "<group>"; };
+		4CC9E092EA39C9681089DAF8 /* BookkeepingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookkeepingView.swift; sourceTree = "<group>"; };
 		56BC5C87D15D36DA4B172502 /* BarrySocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarrySocket.swift; sourceTree = "<group>"; };
 		711E43480463B0F36F74E35A /* Barry.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Barry.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		71393308DC71BFEA688E6D9E /* bookkeeping-kpd-real.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "bookkeeping-kpd-real.txt"; sourceTree = "<group>"; };
 		82541CAA5B38B0BC4F4F7841 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsTests.swift; sourceTree = "<group>"; };
+		8614F12198C2E98DBF83C241 /* BookkeepingParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookkeepingParserTests.swift; sourceTree = "<group>"; };
 		90719416ADE95C8796430FCC /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
 		914915E267DDB87BAB23CD51 /* BarryTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BarryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		96D186517382D5D513389F77 /* ProviderPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderPickerView.swift; sourceTree = "<group>"; };
@@ -74,6 +83,7 @@
 		BF45E6BCC1D548B8E4F42443 /* TraitPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraitPickerView.swift; sourceTree = "<group>"; };
 		C7E99C95867D5B1AAC8D1096 /* ModelPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPickerView.swift; sourceTree = "<group>"; };
 		CE224CF66B4C97A33459B58A /* branch-real.diff */ = {isa = PBXFileReference; path = "branch-real.diff"; sourceTree = "<group>"; };
+		D6D157E513972A66B31E93AA /* BookkeepingParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookkeepingParser.swift; sourceTree = "<group>"; };
 		E0783053B0A9BBD99C908B1F /* uncommitted-real.diff */ = {isa = PBXFileReference; path = "uncommitted-real.diff"; sourceTree = "<group>"; };
 		E1A2BFB100BA9F0EF6437514 /* ServerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConfig.swift; sourceTree = "<group>"; };
 		E2CAB0018F2A48BF0CF9405C /* DiffParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffParserTests.swift; sourceTree = "<group>"; };
@@ -85,6 +95,8 @@
 		039CE6C20C3BCE97212899B4 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				179AB3AA1453CDAAE5967A8F /* bookkeeping-ekp-real.txt */,
+				71393308DC71BFEA688E6D9E /* bookkeeping-kpd-real.txt */,
 				CE224CF66B4C97A33459B58A /* branch-real.diff */,
 				E0783053B0A9BBD99C908B1F /* uncommitted-real.diff */,
 			);
@@ -99,6 +111,7 @@
 				03E69EBB984C4A02A753709F /* BarryApp.swift */,
 				426A0A5C30D5CD32D98FEFE0 /* BarryClient.swift */,
 				56BC5C87D15D36DA4B172502 /* BarrySocket.swift */,
+				D6D157E513972A66B31E93AA /* BookkeepingParser.swift */,
 				0B9960D55344A78CD3D51700 /* ChatStore.swift */,
 				F90CD55FF9CB859395CFD38E /* DiffParser.swift */,
 				0AB1843FA0431EC1E29810D3 /* Info.plist */,
@@ -141,6 +154,7 @@
 		B3D1C2A5B0D9F47640EFC9F8 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				8614F12198C2E98DBF83C241 /* BookkeepingParserTests.swift */,
 				E2CAB0018F2A48BF0CF9405C /* DiffParserTests.swift */,
 				82541CAA5B38B0BC4F4F7841 /* ModelsTests.swift */,
 				039CE6C20C3BCE97212899B4 /* Fixtures */,
@@ -151,6 +165,7 @@
 		FB7954E28A2CF218A4DC7A93 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4CC9E092EA39C9681089DAF8 /* BookkeepingView.swift */,
 				37C626925C7F4E3F562020EE /* ChatView.swift */,
 				08734282A228AB98498A663F /* DiffView.swift */,
 				2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */,
@@ -262,6 +277,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52DC91CE432DC9BF6C366A37 /* bookkeeping-ekp-real.txt in Resources */,
+				DAB804FD47720AD84D63AC89 /* bookkeeping-kpd-real.txt in Resources */,
 				0BB6C57ED98ADD5CE2FB148B /* branch-real.diff in Resources */,
 				C85A3C0B22CB2DD9A6AA3042 /* uncommitted-real.diff in Resources */,
 			);
@@ -282,6 +299,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A310CA16EA3B94B16FC22F9 /* BookkeepingParserTests.swift in Sources */,
 				B1F802D5785FEE52B803AD82 /* DiffParserTests.swift in Sources */,
 				D4C3BEC02506AC4AF6466CB2 /* ModelsTests.swift in Sources */,
 			);
@@ -303,6 +321,8 @@
 				0EDAE32DFFDE33405B2239FF /* BarryApp.swift in Sources */,
 				A923F7D232250DE735ACBE19 /* BarryClient.swift in Sources */,
 				047A2A14D27389CCC5106EE3 /* BarrySocket.swift in Sources */,
+				D0D7644BC15A29D76FFBC55E /* BookkeepingParser.swift in Sources */,
+				2765C90EB84E30208A44DFF4 /* BookkeepingView.swift in Sources */,
 				65D900EFA5D87CE2F52E5010 /* ChatStore.swift in Sources */,
 				D6F6C78DD558E450279C8CCD /* ChatView.swift in Sources */,
 				DDA13FCE298258FAE8138754 /* DiffParser.swift in Sources */,

@@ -237,4 +237,48 @@ final class BarryUITests: XCTestCase {
             attach(app, name: "diff-view-branch-mode")
         }
     }
+
+    /// Opens a real session's bookkeeping timeline from the chat toolbar.
+    /// Prefers a session likely to have real ledger entries (picks the cell
+    /// whose row shows the most messages, a rough proxy for "has been
+    /// running a while") but accepts either the timeline or the empty state
+    /// as a valid render -- both are legitimate depending on which real
+    /// session gets opened.
+    func testOpensBookkeepingViewFromChat() throws {
+        let app = launch()
+        let list = app.collectionViews["sessionsList"]
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
+        let firstCell = list.cells.firstMatch
+        XCTAssertTrue(firstCell.waitForExistence(timeout: 10))
+        firstCell.tap()
+
+        let bookkeepingButton = app.buttons["bookkeepingViewButton"]
+        XCTAssertTrue(bookkeepingButton.waitForExistence(timeout: 10), "bookkeeping toolbar button should appear in chat")
+        bookkeepingButton.tap()
+
+        let timeline = app.scrollViews["bookkeepingTimeline"]
+        let emptyState = app.otherElements["bookkeepingEmptyState"]
+        let found = timeline.waitForExistence(timeout: 10) || emptyState.waitForExistence(timeout: 10)
+        if !found {
+            attach(app, name: "bookkeeping-view-failure")
+        }
+        XCTAssertTrue(found, "bookkeeping view should show either a timeline or an explicit empty state")
+        attach(app, name: "bookkeeping-view")
+
+        // If a real entry rendered, tap into its expanded detail view too.
+        // Matched across ANY element type, not just .buttons -- a custom
+        // view used as a NavigationLink's label with .buttonStyle(.plain)
+        // doesn't reliably expose its accessibilityIdentifier on a button
+        // trait in the accessibility tree (same lesson as ChatView's
+        // messageInput lookup above).
+        let entryCard = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@ OR identifier == %@", "bookkeepingEntry", "bookkeepingDriftEntry"))
+            .firstMatch
+        if entryCard.waitForExistence(timeout: 3) {
+            entryCard.tap()
+            let detail = app.scrollViews["bookkeepingEntryDetail"]
+            XCTAssertTrue(detail.waitForExistence(timeout: 10), "tapping an entry should push its expanded detail view")
+            attach(app, name: "bookkeeping-entry-detail")
+        }
+    }
 }

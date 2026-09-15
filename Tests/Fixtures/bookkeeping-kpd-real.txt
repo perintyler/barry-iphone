@@ -1,0 +1,210 @@
+### 2026-09-14 21:13
+
+### Done
+
+- Ran mockup comparison script: `cd ~/repos/barry/cli && cp ../tmp/picker-mockup/compare.ts ./m.ts && npx tsx ./m.ts`
+- Confirmed write access via `ToolSearch` for `mcp__filesystem__Edit` and `mcp__filesystem__Write`
+
+### Learnings
+
+- The trait picker's behavior diverges at step 3: Option A keeps `memory` in the list, Option B removes it
+- Both options walk identical keystrokes until the selection point
+
+### What went right
+
+- Clear mockup generation with `tmp/picker-mockup` directory
+- Immediate visual comparison of both options
+
+### What went wrong
+
+- Initial confusion about session identity (supervisor question)
+
+### Open loops
+
+- `barry-9d`'s three items: `tool_discovery` trial, identity bags naming unregistered bags, migration-prefix assert
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 22:19
+
+### Done
+
+### Learnings
+
+### What went right
+- Moved `tmp/picker-mockup/` files to `~/.barry/scratch/picker-mockup/` to avoid lint gate failures
+- `eslint . --max-warnings=0` now passes with exit code 0
+
+### What went wrong
+- Initial files were in `tmp/` which caused lint gate to fail
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-14 22:37
+
+### Done
+- Moved mockups to `~/.barry/scratch/picker-mockup/`
+- Verified `eslint` passes on root with `npx eslint . --max-warnings=0`
+- Cleaned `tmp/lint-probe` directory
+
+### Learnings
+- Scratch files breaking the shared lint gate require moving out of repo
+- Peer confirmed gate restored without shared-config changes
+
+### What went right
+- Confirmed gate passes without altering shared config
+- Used negative control (probe file) to verify failure mode
+
+### What went wrong
+- None
+
+### Open loops
+- Peer requested ping before changes to `trait-picker.ts`
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 01:00
+
+### Done
+- Fixed test failures in `picker-navigation.ts` by wrapping zone logic
+- Updated `trait-picker.ts` with 103 new lines
+- Staged 3 files for commit
+
+### Learnings
+- Zone wrapping logic must be tested in isolation
+- Test failures in `picker-navigation.test.ts` were caused by unhandled edge cases
+
+### What went right
+- Typecheck passed (`tsc --noEmit`)
+- Linting passed (`eslint`)
+- Full test suite ran with 267 tests
+
+### What went wrong
+- Initial test failures showed `partitionTraits` had 2 failures
+- `picker-navigation.ts` had 2 pending tests
+
+### Open loops
+- Need to verify `trait-picker.ts` changes don't break other flows
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 01:16
+
+### Done
+- Committed `ce9bde5d` to `barry` with 3 files: `cli/src/prompts/trait-picker.ts`, `cli/src/prompts/picker-navigation.ts`, `cli/test/picker-navigation.test.ts`
+
+### What went right
+- Fixed test failures in `picker-navigation.ts` by wrapping zone logic
+- Committed exactly the files needed without extra changes
+
+### What went wrong
+- None
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 01:32
+
+### Done
+- Verified `78526cf0` is an ancestor of `origin/master` via `merge-base --is-ancestor`
+- Confirmed three picker files exist in `origin/master` (no staged SwiftLint files affected)
+- Ran picker tests against landed state (`v4.1.11`)
+
+### Learnings
+- Blob verification beats eyeball checks for commit safety
+- `GIT_INDEX_FILE`/`write-tree`/`commit-tree` avoids index conflicts better than `cherry-pick`
+
+### What went right
+- SwiftLint colleague's staged file remained untouched
+- Tests passed on landed commit (`17/17`)
+
+### What went wrong
+- Initial `cherry-pick` attempt would have conflicted with staged SwiftLint file
+
+### Open loops
+- Need to document `GIT_INDEX_FILE` method for future landings
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 02:36 ⚠️ TOPIC CHANGE
+
+Was trait-picker-mockup-comparison; now identities app bundle verification.
+
+### Done
+- Verified Barry app bundle paths via `ls`, `mdfind`, and `ps`
+- Confirmed built binary exists at `bags/identities/identities-app/.build/BarryIdentities.app/Contents/MacOS/BarryIdentities`
+- Checked OpenAPI schema change for `note` field in `contracts` (commit `bbe4ee20`)
+- Confirmed live API sends `note` values for Ollama models
+- Built Swift client with `strict-test.swift` to catch schema mismatch
+
+### Learnings
+- The `note` field in OpenAPI models is critical for Ollama model behavior
+- Swift client fails to decode `note` due to schema mismatch
+- Build process uses `swift build` and creates `.app` bundle
+
+### What went right
+- `mdfind` quickly located Barry app bundles
+- `git log` showed recent schema changes
+- Live API responses included `note` values
+
+### What went wrong
+- Swift client threw `dataCorrupted` error due to unexpected `note` key
+- Build script uses `swift build` but doesn't handle macOS bundle structure
+
+### Open loops
+- Fix Swift client to handle `note` field
+- Update build process to create proper macOS bundle
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 02:52
+
+### Done
+- Landed `119b7f8f` on origin/master
+- Verified rail gap changed from 8 → 4
+- Fixed test failures for `AppRailPanelFrameTests`
+
+### Learnings
+- `git diff` context lines can be misleading; need to check actual changed lines
+- Functional changes (gap) matter more than doc comments
+
+### What went right
+- Tests passed after fix
+- Peer confirmed the change was correct
+
+### What went wrong
+- Initial report misidentified the change as a doc comment
+
+### Open loops
+- Dropdown agent selection needs verification
+
+<!-- model: qwen3:4b -->
+
+### 2026-09-15 04:49
+
+### Done
+- Rebuilt Barry app binary with updated OpenAPI spec (current `openapi.yaml`)
+- Confirmed `note` field now decoded correctly in new binary
+- Pushed commit `27ec22d7` to origin
+
+### Learnings
+- Stale binaries cause decoding failures when spec changes
+- `additionalProperties: false` in old spec made `note` field fatal
+
+### What went right
+- Swift client correctly handles new `note` field
+- Tests verify `gap: 4` without hardcoding
+
+### What went wrong
+- Initial binary built Sep 8 vs current spec Sep 14
+- Peer misreported `gap: 8` due to context line quoting
+
+### Open loops
+- None
+
+<!-- model: qwen3:4b -->

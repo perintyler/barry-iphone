@@ -47,6 +47,14 @@ struct ChatView: View {
                 }
                 .accessibilityIdentifier("diffViewButton")
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    BookkeepingView(session: session)
+                } label: {
+                    Image(systemName: "list.bullet.clipboard")
+                }
+                .accessibilityIdentifier("bookkeepingViewButton")
+            }
         }
         .task {
             chat.start(config: store.config)

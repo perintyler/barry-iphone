@@ -73,6 +73,26 @@ enum Theme {
             })
         }
     }
+
+    /// Bookkeeping ledger's semantic colors — ported from the mockup's
+    /// `--success`/`--warn`/`--danger` CSS custom properties. `success` and
+    /// `danger` are the exact same tokens as `Diff.addText`/`Diff.delText`
+    /// (the mockup's `--success`/`--danger` and `--diff-add-text`/
+    /// `--diff-del-text` are the same hex pairs), reused rather than
+    /// redefined; `warn` (Open Loops' amber) has no existing equivalent, so
+    /// it's added here.
+    enum Bookkeeping {
+        static var success: Color { Diff.addText }
+        static var danger: Color { Diff.delText }
+
+        static var warn: Color {
+            Color(uiColor: UIColor { trait in
+                trait.userInterfaceStyle == .dark
+                    ? UIColor(red: 0.851, green: 0.604, blue: 0.239, alpha: 1) // #d99a3d
+                    : UIColor(red: 0.757, green: 0.478, blue: 0.122, alpha: 1) // #c17a1f
+            })
+        }
+    }
 }
 
 /// Small colored dot used for session status.
