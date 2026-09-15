@@ -238,6 +238,98 @@ final class BarryUITests: XCTestCase {
         }
     }
 
+    /// Opens a real session with a long run of consecutive same-tool calls
+    /// sitting right at the tail of its message history
+    /// (`1ISj9U_2gzA51sWM6497J`, "barry-ios-app-setup" -- a 20+ consecutive
+    /// Bash run, the same shape of real data the approved mockup's cited
+    /// 100-call example from `kPdNYibZbAuePBEEWtFEZ` shows, just picked so
+    /// the run is visible without paging into older history: ChatStore
+    /// only loads the most recent ~60 messages up front, and kPd's own big
+    /// runs happen to sit earlier than that tail window) and exercises the
+    /// actual grouped-tool-call card: it should render collapsed with a
+    /// "Bash × N" label, tapping it should expand to reveal individual
+    /// calls, and tapping "Show N more" should reveal the rest. Found by
+    /// the session's real, stable name rather than list position, since
+    /// ordering shifts as new sessions get created on this shared local
+    /// instance.
+    func testGroupedToolRunExpandsAndCollapses() throws {
+        let app = launch()
+        let list = app.collectionViews["sessionsList"]
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
+
+        // Matched across ANY element type (not just .staticTexts) --
+        // SwiftUI's accessibility tree for List row text is inconsistent
+        // about which trait it exposes, same lesson as the messageInput
+        // and bookkeeping-entry lookups elsewhere in this file.
+        let targetRow = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "barry-ios-app-setup"))
+            .firstMatch
+        var rowFound = targetRow.waitForExistence(timeout: 10)
+        if !rowFound {
+            for _ in 0..<4 where !rowFound {
+                list.swipeUp()
+                rowFound = targetRow.waitForExistence(timeout: 3)
+            }
+        }
+        if !rowFound {
+            attach(app, name: "grouped-tool-run-session-not-found")
+        }
+        XCTAssertTrue(rowFound, "expected to find the real long-Bash-run session in the list")
+        targetRow.tap()
+
+        let input = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@", "messageInput"))
+            .firstMatch
+        XCTAssertTrue(input.waitForExistence(timeout: 15), "chat should open")
+        // Let the initial page of history load and group.
+        sleep(2)
+
+        // This session's tail has more than one qualifying run (a real
+        // consequence of real data -- see the messages fetched from the
+        // live API), so more than one toolRunGroup card can be on screen.
+        // The card IS the tap target: its own Button (not a separate
+        // "header" identifier) carries "toolRunGroup", because collapsed
+        // it's the only interactive content in its container and SwiftUI
+        // coalesces the card into one accessibility element -- an
+        // identifier on a non-interactive wrapper around it would be
+        // unreachable. Pin to the first match and reuse that same element
+        // reference throughout so expand/collapse taps land on one card.
+        let group = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@", "toolRunGroup"))
+            .firstMatch
+        var groupFound = group.waitForExistence(timeout: 15)
+        if !groupFound {
+            // One retry: the live shared local API occasionally serves the
+            // initial message page slowly under concurrent load from other
+            // sessions/tests hitting it at once.
+            sleep(2)
+            groupFound = group.waitForExistence(timeout: 15)
+        }
+        if !groupFound {
+            attach(app, name: "grouped-tool-run-missing")
+        }
+        XCTAssertTrue(groupFound, "this session's long tool run should render as a collapsed group, not one row per call")
+        attach(app, name: "grouped-tool-run-collapsed")
+
+        group.tap()
+
+        let showMore = app.buttons["toolRunGroupShowMore"]
+        let expandedFound = showMore.waitForExistence(timeout: 5)
+        if !expandedFound {
+            attach(app, name: "grouped-tool-run-expand-failure")
+        }
+        XCTAssertTrue(expandedFound, "expanding the group should reveal individual calls plus a \"Show N more\" control")
+        attach(app, name: "grouped-tool-run-expanded")
+
+        showMore.tap()
+        sleep(1)
+        attach(app, name: "grouped-tool-run-fully-expanded")
+
+        // Collapsing again should hide the show-more control.
+        group.tap()
+        XCTAssertFalse(app.buttons["toolRunGroupShowMore"].waitForExistence(timeout: 3), "collapsing should hide the expanded call list again")
+    }
+
     /// Opens a real session's bookkeeping timeline from the chat toolbar.
     /// Prefers a session likely to have real ledger entries (picks the cell
     /// whose row shows the most messages, a rough proxy for "has been

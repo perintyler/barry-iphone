@@ -1,17 +1,25 @@
 import SwiftUI
 
-/// Renders one persisted message: user bubble, assistant text, or tool line.
+/// Renders one item of the grouped message stream (see `MessageGrouping`):
+/// a single persisted message -- user bubble, assistant text, or tool line,
+/// same as before grouping existed -- or a collapsed run of consecutive
+/// same-tool calls.
 struct MessageRow: View {
-    let message: Message
+    let item: MessageStreamItem
     @ObservedObject var chat: ChatStore
 
     var body: some View {
-        if message.isUser {
-            UserBubble(text: message.content ?? "", pending: false)
-        } else if message.isAssistant {
-            AssistantText(text: message.content ?? "")
-        } else if message.isTool {
-            ToolRow(message: message, chat: chat)
+        switch item {
+        case .single(let message):
+            if message.isUser {
+                UserBubble(text: message.content ?? "", pending: false)
+            } else if message.isAssistant {
+                AssistantText(text: message.content ?? "")
+            } else if message.isTool {
+                ToolRow(message: message, chat: chat)
+            }
+        case .group(let run):
+            ToolRunGroupView(run: run, chat: chat)
         }
     }
 }
@@ -75,7 +83,7 @@ struct ToolRow: View {
                 Text(message.toolLabel)
                     .font(.callout)
                     .foregroundStyle(.secondary)
-                if let hint = inputHint {
+                if let hint = message.inputHint {
                     Text(hint)
                         .font(.callout)
                         .foregroundStyle(.tertiary)
@@ -87,16 +95,6 @@ struct ToolRow: View {
         .sheet(isPresented: $showDetail) {
             ToolDetailView(message: message, chat: chat)
         }
-    }
-
-    /// A one-line whisper of what the tool was asked to do.
-    private var inputHint: String? {
-        guard let input = message.input?.text, !input.isEmpty else { return nil }
-        let flat = input
-            .replacingOccurrences(of: "\n", with: " ")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !flat.isEmpty, flat != "{}" else { return nil }
-        return String(flat.prefix(60))
     }
 }
 
@@ -142,6 +140,164 @@ struct ToolDetailView: View {
                     .font(.system(.footnote, design: .monospaced))
                     .textSelection(.enabled)
             }
+        }
+    }
+}
+
+// MARK: - Grouped tool runs
+
+/// A collapsed card for 3+ consecutive same-tool calls (see
+/// `MessageGrouping`). Collapsed, it shows the tool name, a "× N" count, and
+/// a generated preview line from the first couple calls' inputs -- same
+/// visual language as `DiffView`'s and `BookkeepingView`'s collapsible
+/// sections (chevron rotation, secondary-background card, tertiary detail
+/// text). Expanded, it lists every call in the run in order; tapping one
+/// opens the same `ToolDetailView` sheet an ungrouped `ToolRow` uses today,
+/// so the per-call detail experience is identical either way.
+struct ToolRunGroupView: View {
+    let run: ToolRun
+    @ObservedObject var chat: ChatStore
+    @State private var expanded = false
+
+    /// How many individual calls show before a "Show N more" reveal --
+    /// keeps a freshly expanded 100-call run from dumping every row at once.
+    private static let initialVisibleCount = 3
+
+    @State private var visibleCount = ToolRunGroupView.initialVisibleCount
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            if expanded {
+                Divider().padding(.leading, 41)
+                callList
+            }
+        }
+        .padding(11)
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.separator), lineWidth: 0.5))
+    }
+
+    private var header: some View {
+        Button {
+            withAnimation(.easeOut(duration: 0.18)) { expanded.toggle() }
+        } label: {
+            HStack(alignment: .top, spacing: 9) {
+                Text(toolIcon)
+                    .font(.system(size: 12))
+                    .frame(width: 26, height: 26)
+                    .background(Color(.tertiarySystemFill), in: RoundedRectangle(cornerRadius: 7))
+
+                VStack(alignment: .leading, spacing: 1) {
+                    (Text(run.toolName).fontWeight(.semibold)
+                     + Text("  ×\u{a0}\(run.count)").foregroundStyle(.tertiary).fontWeight(.regular))
+                        .font(.system(size: 13))
+                        .foregroundStyle(.primary)
+                    if let preview {
+                        Text(preview)
+                            .font(.system(size: 10.5))
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(1)
+                    }
+                }
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.tertiary)
+                    .rotationEffect(.degrees(expanded ? 0 : -90))
+            }
+        }
+        .buttonStyle(.plain)
+        // On the header Button, not the outer VStack: when the card is
+        // collapsed, this Button is the only interactive content inside
+        // that VStack, so SwiftUI coalesces the whole card into ONE
+        // accessibility element and only the identifier on the actual
+        // interactive element (this Button) survives that coalescing --
+        // an identifier placed on the outer container instead is silently
+        // unreachable by a UI test's element query. "toolRunGroup" doubles
+        // as both "the card exists, collapsed or not" and "the tappable
+        // header" for that reason -- there's only ever one queryable
+        // element here until it's expanded.
+        .accessibilityIdentifier("toolRunGroup")
+    }
+
+    private var callList: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(Array(run.messages.prefix(visibleCount))) { message in
+                ToolRunCallRow(message: message, chat: chat)
+            }
+            let remaining = run.count - visibleCount
+            if remaining > 0 {
+                Button("Show \(remaining) more") {
+                    withAnimation(.easeOut(duration: 0.18)) { visibleCount = run.count }
+                }
+                .font(.system(size: 10.5, weight: .semibold))
+                .foregroundStyle(Theme.accent)
+                .accessibilityIdentifier("toolRunGroupShowMore")
+            }
+        }
+        .padding(.top, 9)
+        .padding(.leading, 35)
+    }
+
+    /// First couple calls' input hints, so a collapsed card still says
+    /// roughly what happened without opening it -- generated from
+    /// `Message.inputHint`, the same per-call summary `ToolRow` shows today,
+    /// not a hand-authored description.
+    private var preview: String? {
+        let hints = run.messages.prefix(3).compactMap(\.inputHint)
+        guard !hints.isEmpty else { return nil }
+        return hints.joined(separator: " · ")
+    }
+
+    /// Small per-tool glyph. The mockup's own worked example only shows
+    /// Bash (💻); other common tools get a sensible pick, and anything
+    /// unrecognized falls back to a generic tool glyph rather than guessing.
+    private var toolIcon: String {
+        switch run.toolName {
+        case "Bash": return "💻"
+        case "Read": return "📄"
+        case "Write", "Edit": return "✏️"
+        case "Grep", "Glob": return "🔍"
+        case "WebFetch", "WebSearch": return "🌐"
+        case "Agent", "Task": return "🤖"
+        default: return "🔧"
+        }
+    }
+}
+
+/// One call within an expanded `ToolRunGroupView` -- a slimmer variant of
+/// `ToolRow` (no leading chevron, smaller type to match the card's density)
+/// that opens the same `ToolDetailView` sheet.
+private struct ToolRunCallRow: View {
+    let message: Message
+    @ObservedObject var chat: ChatStore
+    @State private var showDetail = false
+
+    var body: some View {
+        Button {
+            showDetail = true
+        } label: {
+            HStack(spacing: 6) {
+                if let hint = message.inputHint {
+                    Text(hint)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                } else {
+                    Text(message.toolLabel)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showDetail) {
+            ToolDetailView(message: message, chat: chat)
         }
     }
 }

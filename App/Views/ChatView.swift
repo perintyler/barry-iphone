@@ -79,9 +79,9 @@ struct ChatView: View {
                     } else if chat.hasOlderMessages {
                         olderHistoryTrigger
                     }
-                    ForEach(chat.messages) { message in
-                        MessageRow(message: message, chat: chat)
-                            .id(message.sequence)
+                    ForEach(chat.groupedMessages) { item in
+                        MessageRow(item: item, chat: chat)
+                            .id(item.id)
                     }
                     ForEach(chat.pendingSends, id: \.self) { text in
                         UserBubble(text: text, pending: true)

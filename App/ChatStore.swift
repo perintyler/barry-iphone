@@ -12,6 +12,13 @@ import SwiftUI
 final class ChatStore: ObservableObject {
     let session: Session
     @Published var messages: [Message] = []
+    /// `messages` collapsed into single rows and grouped tool runs -- what
+    /// `ChatView` actually renders. Computed rather than cached: message
+    /// arrays here are at most a couple hundred rows (paged), so regrouping
+    /// on every publish is cheap, and it keeps this as the single source of
+    /// truth instead of a second piece of state that could drift from
+    /// `messages`.
+    var groupedMessages: [MessageStreamItem] { MessageGrouping.group(messages) }
     @Published var streamingText = ""
     @Published var isWorking = false
     @Published var pendingSends: [String] = []

@@ -76,6 +76,18 @@ struct Message: Identifiable, Decodable, Equatable {
         }
         return name
     }
+
+    /// A one-line whisper of what the tool was asked to do -- the same
+    /// truncated-input summary `ToolRow` shows per call, reused for a
+    /// grouped tool run's collapsed preview line (see `MessageGrouping`).
+    var inputHint: String? {
+        guard let input = input?.text, !input.isEmpty else { return nil }
+        let flat = input
+            .replacingOccurrences(of: "\n", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !flat.isEmpty, flat != "{}" else { return nil }
+        return String(flat.prefix(60))
+    }
 }
 
 struct MessagesPage: Decodable {
