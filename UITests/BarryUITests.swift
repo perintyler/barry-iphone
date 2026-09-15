@@ -373,4 +373,104 @@ final class BarryUITests: XCTestCase {
             attach(app, name: "bookkeeping-entry-detail")
         }
     }
+
+    /// Assistant text renders real Markdown structure (code blocks, lists),
+    /// not the old `Text(markdown:)` literal-character behavior. There's no
+    /// reliable accessibility-tree way to assert "this rendered as a real
+    /// `<pre>` block" from XCUITest, so this test's real assertion is the
+    /// screenshot -- attached for visual review the same way the grouped-
+    /// tool-run and bookkeeping tests already work. The one thing it DOES
+    /// assert programmatically: the message list itself renders without
+    /// crashing/hanging against a real session's real message history,
+    /// which is the regression a broken theme or cache would actually
+    /// produce (a hang or a blank screen), not a subtle mis-render.
+    func testAssistantMarkdownRendersInChat() throws {
+        let app = launch()
+        let list = app.collectionViews["sessionsList"]
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
+
+        // Prefer the same known-real-content session the bookkeeping and
+        // diff-viewer tests already cite (matches this session's own
+        // mockup data), falling back to the first cell if it's scrolled
+        // out of the current list snapshot.
+        let known = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "trait-picker-mockup-comparison"))
+            .firstMatch
+        let target = known.waitForExistence(timeout: 5) ? known : list.cells.firstMatch
+        XCTAssertTrue(target.waitForExistence(timeout: 10))
+        target.tap()
+
+        let input = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@", "messageInput"))
+            .firstMatch
+        XCTAssertTrue(input.waitForExistence(timeout: 15), "chat should open")
+        sleep(2) // let the initial page load and render
+
+        attach(app, name: "assistant-markdown-rendered")
+    }
+
+    /// Smoke test for the jump-to-bottom affordance: it can appear once
+    /// scrolled away from the bottom, and tapping it is a real, harmless
+    /// interaction. Deliberately loose on timing -- exactly when the arrow
+    /// should appear/disappear relative to scroll position is covered
+    /// precisely by `JumpNavigationTests`' unit tests against the pure
+    /// `JumpNavigation` logic (every boundary: first/last message, nothing
+    /// visible, near/far from bottom, including a verified negative
+    /// control). This test's job is only to catch a REAL regression that
+    /// unit tests can't see -- the arrow never appearing at all, or tapping
+    /// it crashing/hanging -- not to re-verify exact SwiftUI scroll-geometry
+    /// timing against a live API and simulator that both have real,
+    /// variable latency on a shared machine.
+    func testJumpToBottomCanAppearAndBeTapped() throws {
+        let app = launch()
+        let list = app.collectionViews["sessionsList"]
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
+
+        // A session with enough history to actually scroll. Not asserting
+        // "idle" vs "running" here -- unlike the precise timing test this
+        // replaced, a smoke test tolerates content that's still growing.
+        let target = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "trait-picker-mockup-comparison"))
+            .firstMatch
+        var found = target.waitForExistence(timeout: 10)
+        if !found {
+            for _ in 0..<4 where !found {
+                list.swipeUp()
+                found = target.waitForExistence(timeout: 3)
+            }
+        }
+        XCTAssertTrue(found, "expected to find a real long-history session in the list")
+        target.tap()
+
+        let input = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@", "messageInput"))
+            .firstMatch
+        XCTAssertTrue(input.waitForExistence(timeout: 15), "chat should open")
+        sleep(2) // let the initial page load and render
+
+        let jumpDown = app.buttons["jumpToNextUserMessage"]
+        let messagesList = app.scrollViews.firstMatch
+
+        // Several rounds of scroll-and-check rather than one fixed swipe
+        // count -- real content height varies, and this only needs the
+        // arrow to appear AT SOME POINT, not on a specific swipe.
+        var appeared = jumpDown.waitForExistence(timeout: 1)
+        for _ in 0..<8 where !appeared {
+            messagesList.swipeDown()
+            appeared = jumpDown.waitForExistence(timeout: 2)
+        }
+        if !appeared {
+            attach(app, name: "jump-arrow-did-not-appear")
+        }
+        XCTAssertTrue(appeared, "the jump-to-bottom arrow should be able to appear after scrolling up")
+        attach(app, name: "jump-arrow-visible")
+
+        // Tapping it must be a real, harmless interaction -- not asserting
+        // it disappears by a specific moment, just that the app is still
+        // alive and responsive afterward.
+        jumpDown.tap()
+        sleep(1)
+        XCTAssertTrue(input.exists, "chat should still be functional after using the jump arrow")
+        attach(app, name: "jump-arrow-after-tap")
+    }
 }

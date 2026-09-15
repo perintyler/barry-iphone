@@ -1,4 +1,5 @@
 import SwiftUI
+import MarkdownUI
 
 /// Renders one item of the grouped message stream (see `MessageGrouping`):
 /// a single persisted message -- user bubble, assistant text, or tool line,
@@ -7,14 +8,15 @@ import SwiftUI
 struct MessageRow: View {
     let item: MessageStreamItem
     @ObservedObject var chat: ChatStore
+    var visibility: VisibleUserMessages?
 
     var body: some View {
         switch item {
         case .single(let message):
             if message.isUser {
-                UserBubble(text: message.content ?? "", pending: false)
+                UserBubble(text: message.content ?? "", pending: false, sequence: message.sequence, visibility: visibility)
             } else if message.isAssistant {
-                AssistantText(text: message.content ?? "")
+                AssistantText(message: message)
             } else if message.isTool {
                 ToolRow(message: message, chat: chat)
             }
@@ -27,6 +29,12 @@ struct MessageRow: View {
 struct UserBubble: View {
     let text: String
     let pending: Bool
+    /// nil for an optimistic `pendingSends` bubble, which has no stable
+    /// sequence yet and is about to be replaced by the real persisted row --
+    /// only a real message registers as a jump target for the
+    /// previous/next-user-message arrows.
+    var sequence: Int?
+    var visibility: VisibleUserMessages?
 
     var body: some View {
         HStack {
@@ -38,31 +46,47 @@ struct UserBubble: View {
                 .padding(.vertical, 9)
                 .background(Theme.accent.opacity(pending ? 0.55 : 1.0), in: RoundedRectangle(cornerRadius: 18))
         }
+        .onAppear {
+            if let sequence { visibility?.markVisible(sequence) }
+        }
+        .onDisappear {
+            if let sequence { visibility?.markHidden(sequence) }
+        }
     }
 }
 
+/// Full GitHub-Flavored-Markdown rendering for assistant text -- fenced code
+/// blocks, tables, lists, and blockquotes all render as real structure
+/// (approved mockup: https://claude.ai/code/artifact/feec2392), not just the
+/// inline emphasis `Text(markdown:)` used to parse. Deliberately un-
+/// contained (no card background): per the approved mockup, assistant text
+/// stays bare against the screen, the same as before -- only code blocks and
+/// tables get their own boundary, via `Theme.barry`.
+///
+/// Two call shapes, two cost profiles:
+/// - `init(message:)` -- a persisted message. Content never changes once
+///   stored, so it's parsed once and cached by `MarkdownCache` keyed on
+///   `sequence`; scrolling past it again is free.
+/// - `init(streaming:)` -- the one live preview row. Content changes on
+///   every socket delta by design, so caching it would just grow the cache
+///   with values used exactly once each; this path re-parses directly and
+///   is never written to the cache.
 struct AssistantText: View {
-    let text: String
+    private let content: MarkdownContent
+
+    init(message: Message) {
+        self.content = MarkdownCache.shared.content(for: message)
+    }
+
+    init(streaming text: String) {
+        self.content = MarkdownContent(text)
+    }
 
     var body: some View {
-        Text(markdown: text)
-            .font(.body)
+        Markdown(content)
+            .markdownTheme(MarkdownUI.Theme.barry)
             .textSelection(.enabled)
             .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-extension Text {
-    /// Best-effort markdown; falls back to plain text on parse failure.
-    init(markdown: String) {
-        if let attributed = try? AttributedString(
-            markdown: markdown,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        ) {
-            self.init(attributed)
-        } else {
-            self.init(verbatim: markdown)
-        }
     }
 }
 

@@ -9,6 +9,10 @@ settings:
     SWIFT_VERSION: "5.10"
     CODE_SIGNING_ALLOWED: "NO"
     CODE_SIGN_IDENTITY: ""
+packages:
+  MarkdownUI:
+    url: https://github.com/gonzalezreal/swift-markdown-ui
+    exactVersion: 2.4.1
 targets:
   Barry:
     type: application
@@ -29,6 +33,8 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - package: MarkdownUI
   BarryTests:
     type: bundle.unit-test
     platform: iOS

@@ -5,6 +5,25 @@ struct ChatView: View {
     @StateObject private var chat: ChatStore
     @State private var draft = ""
     @FocusState private var inputFocused: Bool
+    @StateObject private var visibility = VisibleUserMessages()
+
+    /// Distance (points) the bottom sentinel may sit below the scroll
+    /// view's visible bottom edge and still count as "at the bottom" --
+    /// large enough to absorb the last message's own height (so finishing a
+    /// short scroll animation doesn't read as "still scrolled away") without
+    /// being so large that a real intentional scroll-up gets mistaken for
+    /// staying at the bottom.
+    private static let nearBottomThreshold: CGFloat = 80
+
+    @State private var isNearBottom = true
+    /// Guards `onPreferenceChange(ScrollOffsetKey.self)` against transient
+    /// geometry readings during the initial-load layout transition -- see
+    /// that handler's own doc comment for why this exists.
+    @State private var initialLoadSettled = false
+    /// One step behind `isNearBottom` -- see the message-arrival handler's
+    /// own doc comment for why this exists instead of reading the live
+    /// value directly.
+    @State private var wasNearBottomBeforeThisMessage = true
 
     private let session: Session
 
@@ -64,51 +83,128 @@ struct ChatView: View {
 
     private var messagesArea: some View {
         ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 14) {
-                    if !chat.initialLoadDone {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 60)
-                    } else if let error = chat.loadError, chat.messages.isEmpty {
-                        Text(error)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 60)
-                    } else if chat.hasOlderMessages {
-                        olderHistoryTrigger
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 14) {
+                        if !chat.initialLoadDone {
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 60)
+                        } else if let error = chat.loadError, chat.messages.isEmpty {
+                            Text(error)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 60)
+                        } else if chat.hasOlderMessages {
+                            olderHistoryTrigger
+                        }
+                        ForEach(chat.groupedMessages) { item in
+                            MessageRow(item: item, chat: chat, visibility: visibility)
+                                .id(item.id)
+                        }
+                        ForEach(chat.pendingSends, id: \.self) { text in
+                            UserBubble(text: text, pending: true)
+                        }
+                        if !chat.streamingText.isEmpty {
+                            AssistantText(streaming: chat.streamingText)
+                                .id("streaming")
+                        } else if chat.isWorking {
+                            WorkingIndicator()
+                                .id("working")
+                        }
+                        BottomSentinelReader().id("bottom")
                     }
-                    ForEach(chat.groupedMessages) { item in
-                        MessageRow(item: item, chat: chat)
-                            .id(item.id)
-                    }
-                    ForEach(chat.pendingSends, id: \.self) { text in
-                        UserBubble(text: text, pending: true)
-                    }
-                    if !chat.streamingText.isEmpty {
-                        AssistantText(text: chat.streamingText)
-                            .id("streaming")
-                    } else if chat.isWorking {
-                        WorkingIndicator()
-                            .id("working")
-                    }
-                    Color.clear.frame(height: 1).id("bottom")
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-            }
-            .defaultScrollAnchor(.bottom)
-            .scrollDismissesKeyboard(.interactively)
-            .onChange(of: chat.messages.last?.sequence) {
-                // Keyed on the newest sequence, not the count: loading OLDER
-                // history also changes count, and must not yank the view
-                // back down to the bottom while the user is scrolled up
-                // reading it.
-                withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("bottom") }
-            }
-            .onChange(of: chat.streamingText) {
-                proxy.scrollTo("bottom")
+                .coordinateSpace(name: "messagesScroll")
+                .defaultScrollAnchor(.bottom)
+                .scrollDismissesKeyboard(.interactively)
+                .onPreferenceChange(ScrollOffsetKey.self) { bottomMinY in
+                    // `bottomMinY` is the sentinel's Y position in the
+                    // scroll view's own coordinate space -- since the
+                    // scroll view fills its container, that space's height
+                    // roughly tracks the visible viewport, so "sentinel at
+                    // or above viewport height" is "at the bottom."
+                    // Comparing against a small fixed threshold rather than
+                    // 0 exactly absorbs sub-pixel scroll settling.
+                    //
+                    // Ignored entirely until `initialLoadSettled`: the
+                    // initial page populates in one publish (empty -> ~60
+                    // rows), and `defaultScrollAnchor(.bottom)` needs one or
+                    // more layout passes to catch up to that growing
+                    // content -- a fixed timer guessing how long that takes
+                    // was tried and was genuinely flaky (verified against
+                    // this session's own real ~60-message load: sometimes
+                    // one pass was enough, sometimes it wasn't). Instead,
+                    // `initialLoadSettled` only flips once a reading
+                    // actually CONFIRMS the view is at the bottom, driven by
+                    // real geometry rather than a guessed duration -- see
+                    // that side of the assignment below.
+                    guard initialLoadSettled else {
+                        if bottomMinY < Self.nearBottomThreshold {
+                            initialLoadSettled = true
+                            isNearBottom = true
+                        }
+                        return
+                    }
+                    isNearBottom = bottomMinY < Self.nearBottomThreshold
+                }
+                .onChange(of: chat.initialLoadDone) {
+                    guard chat.initialLoadDone else { return }
+                    // Backstop only: `initialLoadSettled` normally flips
+                    // off a real confirmed-at-bottom geometry reading (see
+                    // the preference-change handler above). This exists so
+                    // a session whose layout genuinely never reports a
+                    // sub-threshold reading (an edge case, not the normal
+                    // path) doesn't leave geometry updates ignored forever
+                    // -- after a generous window, trust whatever's been
+                    // measured so far rather than staying stuck.
+                    Task {
+                        try? await Task.sleep(nanoseconds: 1_500_000_000)
+                        if !initialLoadSettled { initialLoadSettled = true }
+                    }
+                }
+                .onChange(of: chat.messages.last?.sequence) { oldValue, newValue in
+                    // Keyed on the newest sequence, not the count: loading
+                    // OLDER history also changes count, and must not yank
+                    // the view back down while the user is scrolled up
+                    // reading it. Now also gated on `wasNearBottomBeforeThisMessage`
+                    // (captured BEFORE this new message grew the content),
+                    // not the live `isNearBottom` read at the moment this
+                    // fires -- `isNearBottom` is computed from the
+                    // scroll-view geometry, and a just-arrived message that
+                    // grows `LazyVStack`'s height moves the true bottom
+                    // further away BEFORE the scroll position has a chance
+                    // to follow it down, which briefly (and correctly, in
+                    // isolation) reports `isNearBottom = false` against the
+                    // NEW height even though the user was sitting right at
+                    // the OLD bottom and never scrolled. Reading the stale
+                    // live value here would skip the auto-scroll on new
+                    // content precisely when it's most wanted -- an actively
+                    // streaming session's tail growing while a user is
+                    // reading it, exactly the case that motivated "stick to
+                    // bottom" in the first place.
+                    guard oldValue != nil, wasNearBottomBeforeThisMessage else { return }
+                    withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("bottom") }
+                }
+                .onChange(of: isNearBottom) { _, newValue in
+                    // Track the LAST KNOWN state one step behind, so the
+                    // message-arrival handler above can consult "was this
+                    // near the bottom before the new content changed the
+                    // measurement" rather than "is it near the bottom
+                    // AFTER."
+                    wasNearBottomBeforeThisMessage = newValue
+                }
+                .onChange(of: chat.streamingText) {
+                    guard isNearBottom else { return }
+                    proxy.scrollTo("bottom")
+                }
+
+                JumpControls(chat: chat, visibility: visibility, proxy: proxy, isNearBottom: isNearBottom)
+                    .padding(.trailing, 14)
+                    .padding(.bottom, 10)
             }
         }
     }

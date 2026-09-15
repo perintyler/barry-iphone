@@ -19,6 +19,15 @@ final class ChatStore: ObservableObject {
     /// truth instead of a second piece of state that could drift from
     /// `messages`.
     var groupedMessages: [MessageStreamItem] { MessageGrouping.group(messages) }
+
+    /// Sequence numbers of every loaded user message, oldest first -- the
+    /// jump targets for the previous/next-user-message arrows. Derived, not
+    /// stored: same reasoning as `groupedMessages`, this is at most a
+    /// couple hundred entries even on a long session, cheap to recompute on
+    /// every publish, and it keeps `messages` the single source of truth
+    /// rather than risking a second array drifting out of sync with it.
+    var userMessageSequences: [Int] { messages.filter(\.isUser).map(\.sequence) }
+
     @Published var streamingText = ""
     @Published var isWorking = false
     @Published var pendingSends: [String] = []
