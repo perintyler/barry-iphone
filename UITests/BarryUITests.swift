@@ -86,6 +86,49 @@ final class BarryUITests: XCTestCase {
         app.buttons["Cancel"].tap()
     }
 
+    /// Trait picker: opens from the New Session form, lists real traits from
+    /// the live API, and multi-select actually works -- tapping two rows
+    /// leaves both checked and the row's live count reflects it. Cancels
+    /// out without creating a session, same non-mutating discipline as
+    /// testNewSessionSheetPopulatesFromRealAPI above.
+    func testTraitPickerMultiSelect() throws {
+        let app = launch()
+        app.buttons["newSessionButton"].tap()
+        let prompt = app.textViews["newSessionPrompt"].firstMatch
+        XCTAssertTrue(prompt.waitForExistence(timeout: 10), "new session form should appear")
+
+        let traitsRow = app.buttons["traitsRow"]
+        XCTAssertTrue(traitsRow.waitForExistence(timeout: 10), "traits row should appear in the form")
+        traitsRow.tap()
+
+        let doneButton = app.buttons["traitPickerDone"]
+        XCTAssertTrue(doneButton.waitForExistence(timeout: 10), "trait picker should open")
+        let cells = app.cells
+        XCTAssertTrue(cells.firstMatch.waitForExistence(timeout: 10), "trait list should load real traits from the API")
+        attach(app, name: "trait-picker-empty")
+
+        // Tap two specific, known-real trait rows by their accessibility
+        // identifier rather than positional index -- boundBy(0)/boundBy(1)
+        // proved flaky here (a tap could land between rows during the list's
+        // settle animation and silently miss), where tapping a named,
+        // on-screen element is deterministic.
+        let ableton = app.buttons["trait-ableton"]
+        let actions = app.buttons["trait-actions"]
+        XCTAssertTrue(ableton.waitForExistence(timeout: 5))
+        XCTAssertTrue(actions.waitForExistence(timeout: 5))
+        ableton.tap()
+        actions.tap()
+        attach(app, name: "trait-picker-two-selected")
+
+        doneButton.tap()
+
+        // Back on the form, the row summary should reflect exactly 2 picked.
+        let traitsSummary = app.staticTexts["2 selected"]
+        XCTAssertTrue(traitsSummary.waitForExistence(timeout: 5), "traits row should show \"2 selected\" after picking two")
+        attach(app, name: "new-session-with-traits")
+        app.buttons["Cancel"].tap()
+    }
+
     /// Confirms the app tells the user something useful when it can't reach
     /// Barry at all, instead of hanging or showing a blank list. This is the
     /// "what would I see if this were completely broken" check for the

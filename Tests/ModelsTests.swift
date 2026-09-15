@@ -132,6 +132,23 @@ final class ModelsTests: XCTestCase {
         XCTAssertTrue(response.models(for: .ollama).isEmpty, "unlisted provider should yield an empty list, not crash")
     }
 
+    func testDecodesTraitsResponse() throws {
+        let json = """
+        {"traits":[{"name":"ableton","description":"Ableton Live session control, MIDI sequencing, audio analysis, and mixing tools",
+        "tools":[],"namespaces":["ableton"],"access":"readwrite","skills":["effects-chain","mixing"],
+        "instructions":[],"scope":{},"scopeNames":[],"bag":"ableton"},
+        {"name":"actions","description":"Validated procedures — find and run Barry actions",
+        "tools":[],"namespaces":["actions"],"access":"readwrite","skills":[],"instructions":[],
+        "scope":{},"scopeNames":[],"bag":"actions"}]}
+        """
+        let response = try JSONDecoder().decode(TraitsResponse.self, from: Data(json.utf8))
+        XCTAssertEqual(response.traits.count, 2)
+        XCTAssertEqual(response.traits[0].name, "ableton")
+        XCTAssertEqual(response.traits[0].namespaces, ["ableton"])
+        XCTAssertTrue(response.traits[0].description.contains("MIDI"))
+        XCTAssertEqual(response.traits[1].id, "actions")
+    }
+
     func testServerConfigWebSocketURL() {
         let http = ServerConfig(baseURL: "http://127.0.0.1:9429", hostHeader: "", secret: "")
         XCTAssertEqual(http.webSocketURL?.absoluteString, "ws://127.0.0.1:9429/api/v1/ws")
@@ -199,6 +216,13 @@ final class LiveAPITests: XCTestCase {
         let claudeModels = response.models(for: .claude)
         XCTAssertFalse(claudeModels.isEmpty, "expected at least one real Claude model")
         XCTAssertTrue(claudeModels.allSatisfy { !$0.id.isEmpty && !$0.label.isEmpty })
+    }
+
+    func testFetchesRealTraits() async throws {
+        try await requireServer()
+        let traits = try await BarryClient(config: config).traits()
+        XCTAssertFalse(traits.isEmpty, "expected at least one real trait")
+        XCTAssertTrue(traits.allSatisfy { !$0.name.isEmpty && !$0.description.isEmpty })
     }
 
     func testResolvesRealEffectiveIdentity() async throws {

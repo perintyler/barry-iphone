@@ -239,6 +239,26 @@ struct EffectiveIdentity: Decodable {
     }
 }
 
+// MARK: - Traits
+
+/// One trait from GET /api/v1/traits. A trait is a named bundle of
+/// tool/namespace access a session can be granted — this app only ever
+/// shows and selects traits by name, so only the fields the UI reads are
+/// modeled (the real payload also carries `tools`, `access`, `skills`,
+/// `instructions`, `scope`, `scopeNames`, and `bag`, all server-internal
+/// concerns this picker has no use for).
+struct Trait: Decodable, Equatable, Identifiable {
+    let name: String
+    let description: String
+    let namespaces: [String]
+
+    var id: String { name }
+}
+
+struct TraitsResponse: Decodable {
+    let traits: [Trait]
+}
+
 // MARK: - WebSocket events
 
 /// Server -> client event on /api/v1/ws. Only the fields the app reads.

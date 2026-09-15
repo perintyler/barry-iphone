@@ -14,7 +14,9 @@ a phone.
 - Sends follow-up messages (`POST /sessions/:id/message`), which starts the
   session server-side if it isn't already active.
 - Starts new sessions against a repo Barry already knows about
-  (`POST /sessions/draft` + an initial message).
+  (`POST /sessions/draft` + an initial message), with optional provider,
+  model, and trait overrides -- traits picked from the real
+  `GET /api/v1/traits` catalog, multi-select, none required.
 - Live-ish updates: a WebSocket subscription drives instant streaming
   previews and "poll now" nudges; a REST poll (2.5s) is the source of
   truth, so the app works correctly even for CLI-started sessions the
@@ -37,7 +39,8 @@ no design system dependency:
   slower, on the poll interval.
 - `ChatStore.swift` / `AppStore.swift` — `@MainActor` `ObservableObject`s;
   one per session, one for the app. No Combine beyond `@Published`.
-- `Views/` — four screens: sessions list, chat, new-session sheet, settings.
+- `Views/` — four screens: sessions list, chat, new-session sheet, settings
+  (new-session also opens provider/model/trait picker sheets).
 
 ## Reaching the Mac
 

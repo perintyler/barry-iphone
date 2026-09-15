@@ -103,6 +103,14 @@ struct BarryClient {
         try await get(ModelsResponse.self, path: "/api/v1/models")
     }
 
+    /// All traits a session can be granted. Zero traits is a fully valid
+    /// selection (the server default), so this is a plain flat list -- no
+    /// "none selected" sentinel needed, matching the web app's own
+    /// zero-default NewSessionModal behavior.
+    func traits() async throws -> [Trait] {
+        try await get(TraitsResponse.self, path: "/api/v1/traits").traits
+    }
+
     /// What a session against this repo would use if nothing is overridden —
     /// resolved server-side from identity/repo/global config, the same
     /// resolution a real session start performs. Used to show the real
@@ -119,11 +127,16 @@ struct BarryClient {
     /// though this app never surfaces "system prompt" as its own concept —
     /// callers pass the user's first message here. The draft starts inert;
     /// a follow-up `sendMessage` is what actually kicks the session off.
-    func createDraft(repoPath: String, systemPrompt: String, name: String?, provider: String?, model: String?) async throws -> Session {
+    func createDraft(repoPath: String, systemPrompt: String, name: String?, provider: String?, model: String?, traits: [String] = []) async throws -> Session {
         var body: [String: Any] = ["repoPath": repoPath, "systemPrompt": systemPrompt]
         if let name, !name.isEmpty { body["name"] = name }
         if let provider, !provider.isEmpty { body["provider"] = provider }
         if let model, !model.isEmpty { body["model"] = model }
+        // Omitted (not sent as []) when empty: the server schema already
+        // defaults an absent `traits` to [], so this keeps the request body
+        // minimal for the common zero-traits case rather than asserting an
+        // empty array that means the same thing.
+        if !traits.isEmpty { body["traits"] = traits }
         return try await post(Session.self, path: "/api/v1/sessions/draft", body: body)
     }
 

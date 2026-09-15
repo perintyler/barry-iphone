@@ -15,6 +15,7 @@ tests fail on the shape, and `LiveAPITests` fails on the live endpoint.
 | Integration | `Tests/ModelsTests.swift` (`LiveAPITests`) | live local API | Sessions/messages/repos endpoints are reachable and decode; sequence numbers are monotonic (the incremental-poll invariant the app relies on) |
 | UI, read paths | `UITests/BarryUITests.swift` | live local API, real simulator | Session list renders; opening a session renders its message history and shows a working input bar; Settings' "Test connection" round-trips `/health` |
 | UI, compose path | `UITests/BarryUITests.swift` (`testNewSessionSheetPopulatesFromRealAPI`) | live local API | The repo picker loads real repos and the Start button gates correctly — **does not submit**, on purpose (see below) |
+| UI, trait picker | `UITests/BarryUITests.swift` (`testTraitPickerMultiSelect`) | live local API | The trait picker loads the real trait catalog, tapping two rows leaves both checked (filled circle + accent row), and the New Session form's "Traits" row reflects the live count — does not submit |
 
 `LiveAPITests` and the UI tests `XCTSkip` (not fail) if `127.0.0.1:9429` is
 unreachable, so CI or a machine without Barry running doesn't get spurious

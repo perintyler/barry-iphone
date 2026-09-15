@@ -23,6 +23,12 @@ struct NewSessionView: View {
     @State private var showProviderPicker = false
     @State private var showModelPicker = false
 
+    // No resolved-default concept for traits (unlike provider/model) -- the
+    // web app default is also zero-selected, so an empty Set here is simply
+    // correct, not a placeholder awaiting resolution.
+    @State private var selectedTraits: Set<String> = []
+    @State private var showTraitPicker = false
+
     /// What the form displays and what actually gets sent — an explicit
     /// choice if the user made one, otherwise the real resolved default.
     private var effectiveProvider: ProviderId { selectedProvider ?? resolvedDefaultProvider }
@@ -73,6 +79,19 @@ struct NewSessionView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
+                    Button { showTraitPicker = true } label: {
+                        HStack {
+                            Text("Traits").foregroundStyle(.primary)
+                            Spacer()
+                            Text(traitsRowValue)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .accessibilityIdentifier("traitsRow")
                 }
                 if let error {
                     Section {
@@ -110,6 +129,10 @@ struct NewSessionView: View {
                 )
                 .environmentObject(store)
             }
+            .sheet(isPresented: $showTraitPicker) {
+                TraitPickerView(selection: $selectedTraits)
+                    .environmentObject(store)
+            }
             .task {
                 repos = (try? await store.client.repos()) ?? []
                 if selectedRepoPath == nil { selectedRepoPath = repos.first?.path }
@@ -127,6 +150,18 @@ struct NewSessionView: View {
     private var modelRowValue: String {
         if let selectedModel { return selectedModel }
         return resolvedDefaultModel ?? "Default"
+    }
+
+    /// "None" with zero picked (the normal starting state, not an error),
+    /// the trait name when exactly one is picked, otherwise a count --
+    /// mirrors the web app's zero-default chip picker having no traits
+    /// checked until the user opts in.
+    private var traitsRowValue: String {
+        switch selectedTraits.count {
+        case 0: return "None"
+        case 1: return selectedTraits.first ?? "None"
+        default: return "\(selectedTraits.count) selected"
+        }
     }
 
     private func resolveDefaults() async {
@@ -154,7 +189,8 @@ struct NewSessionView: View {
                 systemPrompt: prompt,
                 name: nil,
                 provider: selectedProvider?.rawValue,
-                model: selectedModel
+                model: selectedModel,
+                traits: Array(selectedTraits)
             )
             try await store.client.sendMessage(sessionId: session.id, content: prompt)
             await store.refreshSessions()

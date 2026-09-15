@@ -10,6 +10,7 @@
 		047A2A14D27389CCC5106EE3 /* BarrySocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BC5C87D15D36DA4B172502 /* BarrySocket.swift */; };
 		069E7CA0BE52941C2FCECC62 /* ProviderPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D186517382D5D513389F77 /* ProviderPickerView.swift */; };
 		0EDAE32DFFDE33405B2239FF /* BarryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E69EBB984C4A02A753709F /* BarryApp.swift */; };
+		0FF7249D795CF44D2C0EEA17 /* TraitPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF45E6BCC1D548B8E4F42443 /* TraitPickerView.swift */; };
 		1FF0DBCCC316F9EB0EEF6730 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295E4CC1C22134DEBA7E815D /* Theme.swift */; };
 		2E5042D78A35F90AE439F967 /* ModelPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7E99C95867D5B1AAC8D1096 /* ModelPickerView.swift */; };
 		428014EADD8008BE8FC57DC8 /* BarryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E905712AFEFC34CC590D4E /* BarryUITests.swift */; };
@@ -64,6 +65,7 @@
 		96D186517382D5D513389F77 /* ProviderPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderPickerView.swift; sourceTree = "<group>"; };
 		A7E905712AFEFC34CC590D4E /* BarryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarryUITests.swift; sourceTree = "<group>"; };
 		AC997F223D9EBF2CACE43BC2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BF45E6BCC1D548B8E4F42443 /* TraitPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraitPickerView.swift; sourceTree = "<group>"; };
 		C7E99C95867D5B1AAC8D1096 /* ModelPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPickerView.swift; sourceTree = "<group>"; };
 		E1A2BFB100BA9F0EF6437514 /* ServerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConfig.swift; sourceTree = "<group>"; };
 		F08AB4623C5D33768E74DF13 /* BarryUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BarryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -134,6 +136,7 @@
 				96D186517382D5D513389F77 /* ProviderPickerView.swift */,
 				90719416ADE95C8796430FCC /* SessionsView.swift */,
 				40C8360A0C12E8262F1FF7C1 /* SettingsView.swift */,
+				BF45E6BCC1D548B8E4F42443 /* TraitPickerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -277,6 +280,7 @@
 				A1702628A501CD85B2E965CD /* SessionsView.swift in Sources */,
 				742D443B33BB08EC6AED6953 /* SettingsView.swift in Sources */,
 				1FF0DBCCC316F9EB0EEF6730 /* Theme.swift in Sources */,
+				0FF7249D795CF44D2C0EEA17 /* TraitPickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
