@@ -93,6 +93,45 @@ final class ModelsTests: XCTestCase {
         XCTAssertNotNil(ISO8601.date("2026-09-11T12:00:00Z"))
     }
 
+    func testDecodesEffectiveIdentity() throws {
+        let json = """
+        {"identity":{"id":1357913634,"name":"bux","token":"prf_4de45a242d2d",
+        "displayName":"Barry Bux","defaultCodingAgent":"cursor","defaultModel":"claude-opus-5"},
+        "source":"repo","repoRoot":"/Users/tyler/repos/barry"}
+        """
+        let effective = try JSONDecoder().decode(EffectiveIdentity.self, from: Data(json.utf8))
+        XCTAssertEqual(effective.identity.defaultCodingAgent, "cursor")
+        XCTAssertEqual(effective.identity.defaultModel, "claude-opus-5")
+        XCTAssertEqual(effective.defaultProvider, .cursor)
+    }
+
+    /// Regression: defaultProvider originally referenced defaultCodingAgent
+    /// at the wrong nesting level and failed to compile — this test exists
+    /// so the correct nesting (identity.defaultCodingAgent) never drifts
+    /// back to the broken shape silently.
+    func testEffectiveIdentityDefaultsToClaudeWhenAgentUnset() throws {
+        let json = """
+        {"identity":{"id":1,"name":"default","token":"t","displayName":"Default",
+        "defaultCodingAgent":null,"defaultModel":null},"source":"global","repoRoot":null}
+        """
+        let effective = try JSONDecoder().decode(EffectiveIdentity.self, from: Data(json.utf8))
+        XCTAssertEqual(effective.defaultProvider, .claude)
+        XCTAssertNil(effective.identity.defaultModel)
+    }
+
+    func testDecodesModelsResponse() throws {
+        let json = """
+        {"providers":{"claude":{"default":null,"small":"claude-haiku-4-5",
+        "models":[{"id":"claude-opus-5","label":"Opus 5"},{"id":"claude-sonnet-5","label":"Sonnet 5"}]},
+        "codex":{"default":null,"small":null,"models":[{"id":"gpt-5.6-sol","label":"GPT-5.6 Sol"}]}}}
+        """
+        let response = try JSONDecoder().decode(ModelsResponse.self, from: Data(json.utf8))
+        XCTAssertEqual(response.models(for: .claude).count, 2)
+        XCTAssertEqual(response.models(for: .claude).first?.id, "claude-opus-5")
+        XCTAssertEqual(response.models(for: .codex).count, 1)
+        XCTAssertTrue(response.models(for: .ollama).isEmpty, "unlisted provider should yield an empty list, not crash")
+    }
+
     func testServerConfigWebSocketURL() {
         let http = ServerConfig(baseURL: "http://127.0.0.1:9429", hostHeader: "", secret: "")
         XCTAssertEqual(http.webSocketURL?.absoluteString, "ws://127.0.0.1:9429/api/v1/ws")
@@ -154,6 +193,26 @@ final class LiveAPITests: XCTestCase {
     /// requires (non-empty string) — every draft-session creation 400'd in
     /// the field with "systemPrompt: Invalid input: expected string,
     /// received undefined", caught only by hand-testing on a real device
+    func testFetchesRealModelsForClaude() async throws {
+        try await requireServer()
+        let response = try await BarryClient(config: config).models()
+        let claudeModels = response.models(for: .claude)
+        XCTAssertFalse(claudeModels.isEmpty, "expected at least one real Claude model")
+        XCTAssertTrue(claudeModels.allSatisfy { !$0.id.isEmpty && !$0.label.isEmpty })
+    }
+
+    func testResolvesRealEffectiveIdentity() async throws {
+        try await requireServer()
+        let client = BarryClient(config: config)
+        guard let repo = try await client.repos().first else {
+            throw XCTSkip("no repos configured")
+        }
+        let effective = try await client.effectiveIdentity(repoPath: repo.path)
+        // defaultProvider always resolves to something real, even if the
+        // server returns no explicit defaultCodingAgent (falls back to .claude).
+        XCTAssertTrue(ProviderId.allCases.contains(effective.defaultProvider))
+    }
+
     /// because no test exercised the actual network call. This creates one
     /// real (harmless, self-archiving) session end-to-end to close that gap.
     func testCreatesDraftSessionEndToEnd() async throws {

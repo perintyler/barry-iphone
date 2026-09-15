@@ -99,6 +99,20 @@ struct BarryClient {
         try await get(ReposPage.self, path: "/api/v1/repos").repos
     }
 
+    func models() async throws -> ModelsResponse {
+        try await get(ModelsResponse.self, path: "/api/v1/models")
+    }
+
+    /// What a session against this repo would use if nothing is overridden —
+    /// resolved server-side from identity/repo/global config, the same
+    /// resolution a real session start performs. Used to show the real
+    /// default value in the New Session form instead of a placeholder.
+    func effectiveIdentity(repoPath: String) async throws -> EffectiveIdentity {
+        try await get(EffectiveIdentity.self, path: "/api/v1/identities/effective", query: [
+            URLQueryItem(name: "repoPath", value: repoPath),
+        ])
+    }
+
     /// Create a draft session; returns the new session.
     ///
     /// `systemPrompt` is REQUIRED by the server (non-empty string) even
