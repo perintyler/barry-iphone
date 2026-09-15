@@ -23,7 +23,7 @@ final class BookkeepingParserTests: XCTestCase {
     /// "header present, body empty" case the omit-when-empty rule allows
     /// for (the 2026-09-14 22:19 entry has `### Done` and `### Learnings`
     /// headers with nothing under them).
-    func testParsesRealKpdSummary() {
+    func testParsesRealKpdSummary() throws {
         let raw = loadFixture("bookkeeping-kpd-real.txt")
         XCTAssertFalse(raw.isEmpty, "fixture must be present and non-empty")
 
@@ -32,7 +32,7 @@ final class BookkeepingParserTests: XCTestCase {
 
         let driftEntries = entries.filter(\.isDrift)
         XCTAssertEqual(driftEntries.count, 1)
-        let drift = driftEntries[0]
+        let drift = try XCTUnwrap(driftEntries.first)
         XCTAssertEqual(drift.timestampRaw, "2026-09-15 02:36")
         XCTAssertEqual(drift.driftDescription, "Was trait-picker-mockup-comparison; now identities app bundle verification.")
         XCTAssertNotNil(drift.timestamp, "a real ### YYYY-MM-DD HH:MM header must parse to a Date")
@@ -102,7 +102,7 @@ final class BookkeepingParserTests: XCTestCase {
 
         // Chronological order in the raw text is preserved (oldest first);
         // callers reverse for most-recent-first display.
-        for i in 1..<entries.count {
+        for i in entries.indices.dropFirst() {
             guard let prev = entries[i - 1].timestamp, let cur = entries[i].timestamp else { continue }
             XCTAssertLessThanOrEqual(prev, cur, "entries should come back in the raw text's chronological order")
         }
@@ -121,7 +121,7 @@ final class BookkeepingParserTests: XCTestCase {
 
     // MARK: Synthetic shape tests
 
-    func testParsesSingleEntryAllSections() {
+    func testParsesSingleEntryAllSections() throws {
         let raw = """
         ### 2026-01-01 09:00
 
@@ -144,7 +144,7 @@ final class BookkeepingParserTests: XCTestCase {
         """
         let entries = BookkeepingParser.parse(raw)
         XCTAssertEqual(entries.count, 1)
-        let e = entries[0]
+        let e = try XCTUnwrap(entries.first)
         XCTAssertFalse(e.isDrift)
         XCTAssertNil(e.driftDescription)
         XCTAssertEqual(e.done, "- did a thing")
@@ -159,7 +159,7 @@ final class BookkeepingParserTests: XCTestCase {
     /// Sections genuinely omitted entirely (not even a header) -- the
     /// "supposed to" behavior per the task brief, distinct from the
     /// "header present, body empty" case covered by the real kpd fixture.
-    func testOmittedSectionsProduceNilNotEmptyString() {
+    func testOmittedSectionsProduceNilNotEmptyString() throws {
         let raw = """
         ### 2026-01-01 09:00
 
@@ -170,7 +170,7 @@ final class BookkeepingParserTests: XCTestCase {
         """
         let entries = BookkeepingParser.parse(raw)
         XCTAssertEqual(entries.count, 1)
-        let e = entries[0]
+        let e = try XCTUnwrap(entries.first)
         XCTAssertEqual(e.done, "- only this section exists")
         XCTAssertNil(e.learnings)
         XCTAssertNil(e.wentRight)
@@ -182,7 +182,7 @@ final class BookkeepingParserTests: XCTestCase {
     /// A section with a header but literally nothing under it (blank line
     /// straight to the next "###") must parse to nil, matching the real
     /// kpd fixture's 22:19 entry behavior on synthetic input too.
-    func testHeaderOnlySectionIsNil() {
+    func testHeaderOnlySectionIsNil() throws {
         let raw = """
         ### 2026-01-01 09:00
 
@@ -195,11 +195,12 @@ final class BookkeepingParserTests: XCTestCase {
         """
         let entries = BookkeepingParser.parse(raw)
         XCTAssertEqual(entries.count, 1)
-        XCTAssertNil(entries[0].done)
-        XCTAssertEqual(entries[0].learnings, "- something")
+        let entry = try XCTUnwrap(entries.first)
+        XCTAssertNil(entry.done)
+        XCTAssertEqual(entry.learnings, "- something")
     }
 
-    func testDriftEntryParsesFlagAndDescription() {
+    func testDriftEntryParsesFlagAndDescription() throws {
         let raw = """
         ### 2026-01-01 10:00 ⚠️ TOPIC CHANGE
 
@@ -212,9 +213,10 @@ final class BookkeepingParserTests: XCTestCase {
         """
         let entries = BookkeepingParser.parse(raw)
         XCTAssertEqual(entries.count, 1)
-        XCTAssertTrue(entries[0].isDrift)
-        XCTAssertEqual(entries[0].driftDescription, "Was foo; now bar.")
-        XCTAssertEqual(entries[0].done, "- switched topics")
+        let entry = try XCTUnwrap(entries.first)
+        XCTAssertTrue(entry.isDrift)
+        XCTAssertEqual(entry.driftDescription, "Was foo; now bar.")
+        XCTAssertEqual(entry.done, "- switched topics")
     }
 
     func testMultipleEntriesParseIndependently() {
@@ -235,11 +237,11 @@ final class BookkeepingParserTests: XCTestCase {
         """
         let entries = BookkeepingParser.parse(raw)
         XCTAssertEqual(entries.count, 2)
-        XCTAssertEqual(entries[0].done, "- first entry work")
-        XCTAssertEqual(entries[1].done, "- second entry work")
+        XCTAssertEqual(entries.first?.done, "- first entry work")
+        XCTAssertEqual(entries.dropFirst().first?.done, "- second entry work")
     }
 
-    func testMultilineSectionContentPreservesLines() {
+    func testMultilineSectionContentPreservesLines() throws {
         let raw = """
         ### 2026-01-01 09:00
 
@@ -251,7 +253,9 @@ final class BookkeepingParserTests: XCTestCase {
         <!-- model: qwen3:4b -->
         """
         let entries = BookkeepingParser.parse(raw)
-        XCTAssertEqual(entries[0].done, "- line one\n- line two\n- line three")
+        XCTAssertEqual(entries.count, 1)
+        let entry = try XCTUnwrap(entries.first)
+        XCTAssertEqual(entry.done, "- line one\n- line two\n- line three")
     }
 
     // MARK: Boundary values / negative-control-relevant cases
@@ -272,7 +276,7 @@ final class BookkeepingParserTests: XCTestCase {
 
     /// The drift marker must be the emoji+text pair exactly as the server
     /// writes it, not any bracketed warning text.
-    func testNonDriftEntryWithWarningWordInBodyIsNotFlaggedDrift() {
+    func testNonDriftEntryWithWarningWordInBodyIsNotFlaggedDrift() throws {
         let raw = """
         ### 2026-01-01 09:00
 
@@ -282,6 +286,8 @@ final class BookkeepingParserTests: XCTestCase {
         <!-- model: qwen3:4b -->
         """
         let entries = BookkeepingParser.parse(raw)
-        XCTAssertFalse(entries[0].isDrift)
+        XCTAssertEqual(entries.count, 1)
+        let entry = try XCTUnwrap(entries.first)
+        XCTAssertFalse(entry.isDrift)
     }
 }
