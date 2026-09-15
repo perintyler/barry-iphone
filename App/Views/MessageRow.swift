@@ -14,7 +14,7 @@ struct MessageRow: View {
         switch item {
         case .single(let message):
             if message.isUser {
-                UserBubble(text: message.content ?? "", pending: false, sequence: message.sequence, visibility: visibility)
+                UserMessageRow(text: message.content ?? "", pending: false, sequence: message.sequence, visibility: visibility)
             } else if message.isAssistant {
                 AssistantText(message: message)
             } else if message.isTool {
@@ -26,25 +26,56 @@ struct MessageRow: View {
     }
 }
 
-struct UserBubble: View {
+/// A user message: a flat, full-width tinted band with a "You" label --
+/// approved as Option B over the default iOS messenger bubble
+/// (https://claude.ai/code/artifact/71124732), matching how claude.ai,
+/// ChatGPT, and Cursor differentiate speakers in a technical chat without
+/// messenger chrome. Long messages auto-collapse (see `MessageCollapse`),
+/// matching the tool-run-grouping card's own expand/collapse interaction
+/// and animation for consistency across the message list.
+struct UserMessageRow: View {
     let text: String
     let pending: Bool
-    /// nil for an optimistic `pendingSends` bubble, which has no stable
+    /// nil for an optimistic `pendingSends` row, which has no stable
     /// sequence yet and is about to be replaced by the real persisted row --
     /// only a real message registers as a jump target for the
     /// previous/next-user-message arrows.
     var sequence: Int?
     var visibility: VisibleUserMessages?
 
+    @State private var expanded = false
+
+    private var collapsedByDefault: Bool { MessageCollapse.shouldCollapse(text) }
+    private var isCollapsed: Bool { collapsedByDefault && !expanded }
+
     var body: some View {
-        HStack {
-            Spacer(minLength: 48)
-            Text(text)
-                .font(.body)
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                .background(Theme.accent.opacity(pending ? 0.55 : 1.0), in: RoundedRectangle(cornerRadius: 18))
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("You")
+                    .font(.system(size: 10.5, weight: .semibold))
+                    .tracking(0.3)
+                    .foregroundStyle(Theme.accent)
+                Text(text)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .lineLimit(isCollapsed ? MessageCollapse.lineThreshold : nil)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.accentSoft, in: RoundedRectangle(cornerRadius: 10))
+            .opacity(pending ? 0.6 : 1.0)
+
+            if collapsedByDefault {
+                Button(isCollapsed ? "Show more" : "Show less") {
+                    withAnimation(.easeOut(duration: 0.18)) { expanded.toggle() }
+                }
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Theme.accent)
+                .padding(.top, 4)
+                .accessibilityIdentifier(isCollapsed ? "userMessageShowMore" : "userMessageShowLess")
+            }
         }
         .onAppear {
             if let sequence { visibility?.markVisible(sequence) }
@@ -207,10 +238,12 @@ struct ToolRunGroupView: View {
             withAnimation(.easeOut(duration: 0.18)) { expanded.toggle() }
         } label: {
             HStack(alignment: .top, spacing: 9) {
-                Text(toolIcon)
-                    .font(.system(size: 12))
+                Image(systemName: toolIconSymbol)
+                    .font(.system(size: 12, weight: .medium))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(Theme.accent)
                     .frame(width: 26, height: 26)
-                    .background(Color(.tertiarySystemFill), in: RoundedRectangle(cornerRadius: 7))
+                    .background(Theme.accentSoft, in: RoundedRectangle(cornerRadius: 7))
 
                 VStack(alignment: .leading, spacing: 1) {
                     (Text(run.toolName).fontWeight(.semibold)
@@ -276,18 +309,25 @@ struct ToolRunGroupView: View {
         return hints.joined(separator: " · ")
     }
 
-    /// Small per-tool glyph. The mockup's own worked example only shows
-    /// Bash (💻); other common tools get a sensible pick, and anything
-    /// unrecognized falls back to a generic tool glyph rather than guessing.
-    private var toolIcon: String {
+    /// Per-tool SF Symbol -- approved (https://claude.ai/code/artifact/e8dcd7a7)
+    /// as a replacement for the original mockup's emoji glyphs: per Apple's
+    /// Human Interface Guidelines, interface icons should share "consistent
+    /// size, level of detail, stroke thickness, and perspective," which
+    /// emoji can't do (they don't tint, don't have weight variants, and
+    /// render inconsistently across contexts). Rendered with
+    /// `.symbolRenderingMode(.hierarchical)` and `Theme.accent`, matching
+    /// `DiffView`'s existing tinted-icon language rather than introducing a
+    /// new visual pattern. Anything unrecognized falls back to a generic
+    /// tool glyph rather than guessing.
+    private var toolIconSymbol: String {
         switch run.toolName {
-        case "Bash": return "💻"
-        case "Read": return "📄"
-        case "Write", "Edit": return "✏️"
-        case "Grep", "Glob": return "🔍"
-        case "WebFetch", "WebSearch": return "🌐"
-        case "Agent", "Task": return "🤖"
-        default: return "🔧"
+        case "Bash": return "terminal"
+        case "Read": return "doc.text"
+        case "Write", "Edit": return "pencil"
+        case "Grep", "Glob": return "magnifyingglass"
+        case "WebFetch", "WebSearch": return "globe"
+        case "Agent", "Task": return "sparkles"
+        default: return "wrench.and.screwdriver"
         }
     }
 }

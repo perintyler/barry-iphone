@@ -473,4 +473,72 @@ final class BarryUITests: XCTestCase {
         XCTAssertTrue(input.exists, "chat should still be functional after using the jump arrow")
         attach(app, name: "jump-arrow-after-tap")
     }
+
+    /// Real long user messages exist in session `bksiuOq8kgSihiNmNEwwC`
+    /// (`barry-bag-audit`, completed/idle -- confirmed via the live API:
+    /// five real user messages over 2000 characters each, INSIDE the
+    /// initial ~60-message tail `ChatStore` loads on open, not further
+    /// back in history behind a "load older" boundary). That last point
+    /// matters: an earlier version of this test used
+    /// `kPdNYibZbAuePBEEWtFEZ`, whose tail-60 page turned out to have ZERO
+    /// user messages of any kind (confirmed via the live API after this
+    /// test failed twice against real screenshots showing only assistant
+    /// text no matter how far it scrolled) -- its long messages exist but
+    /// sit further back in history than a plain scroll-up ever reaches
+    /// without also triggering `loadOlder()`. This session's long messages
+    /// are guaranteed reachable by scrolling alone.
+    func testLongUserMessageCollapsesAndExpands() throws {
+        let app = launch()
+        let list = app.collectionViews["sessionsList"]
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
+
+        let target = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "barry-bag-audit"))
+            .firstMatch
+        var found = target.waitForExistence(timeout: 10)
+        if !found {
+            for _ in 0..<4 where !found {
+                list.swipeUp()
+                found = target.waitForExistence(timeout: 3)
+            }
+        }
+        XCTAssertTrue(found, "expected to find the known session with real long user messages")
+        target.tap()
+
+        let input = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier == %@", "messageInput"))
+            .firstMatch
+        XCTAssertTrue(input.waitForExistence(timeout: 15), "chat should open")
+        sleep(2)
+
+        // `ChatView` opens scrolled to the bottom, and this session's own
+        // tail can legitimately be assistant text -- scroll up through
+        // real history rather than assuming a collapsed message is already
+        // on-screen at rest (this genuinely failed once: the first
+        // screenshot showed only assistant text, no user message visible
+        // at all, because it happened to open scrolled past every one).
+        let messagesList = app.scrollViews.firstMatch
+        let showMore = app.buttons["userMessageShowMore"]
+        var showMoreFound = showMore.waitForExistence(timeout: 2)
+        for _ in 0..<8 where !showMoreFound {
+            messagesList.swipeDown()
+            showMoreFound = showMore.waitForExistence(timeout: 2)
+        }
+        if !showMoreFound {
+            attach(app, name: "message-collapse-not-found")
+        }
+        XCTAssertTrue(showMoreFound, "a real 2000+ character user message should render collapsed with a Show more control")
+        attach(app, name: "message-style-collapsed")
+
+        showMore.tap()
+        sleep(1)
+
+        let showLess = app.buttons["userMessageShowLess"]
+        XCTAssertTrue(showLess.waitForExistence(timeout: 5), "expanding should reveal a Show less control")
+        attach(app, name: "message-style-expanded")
+
+        showLess.tap()
+        sleep(1)
+        XCTAssertTrue(app.buttons["userMessageShowMore"].waitForExistence(timeout: 5), "collapsing again should restore the Show more control")
+    }
 }

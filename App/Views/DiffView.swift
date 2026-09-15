@@ -363,9 +363,10 @@ private struct DiffFileSection: View {
         let remainingHunks = file.hunks.count - shown.count
         let remainingLines = file.totalLines - shownLineCount
 
+        let language = SyntaxLanguage.detect(fromFilename: file.displayName)
         return VStack(alignment: .leading, spacing: 0) {
             ForEach(shown) { hunk in
-                DiffHunkView(hunk: hunk)
+                DiffHunkView(hunk: hunk, language: language)
             }
             if isLarge && remainingHunks > 0 {
                 Button(action: onShowMoreHunks) {
@@ -387,6 +388,7 @@ private struct DiffFileSection: View {
 
 private struct DiffHunkView: View {
     let hunk: DiffHunk
+    let language: SyntaxLanguage
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -401,7 +403,7 @@ private struct DiffHunkView: View {
                 .background(Theme.accentSoft.opacity(0.85))
 
             ForEach(hunk.lines) { line in
-                DiffLineView(line: line)
+                DiffLineView(line: line, language: language)
             }
         }
     }
@@ -409,6 +411,7 @@ private struct DiffHunkView: View {
 
 private struct DiffLineView: View {
     let line: DiffLine
+    let language: SyntaxLanguage
 
     private var background: Color {
         switch line.type {
@@ -442,6 +445,18 @@ private struct DiffLineView: View {
         }
     }
 
+    /// Syntax-colored tokens layered on top of `color` (the add/del/context
+    /// base text color) -- computed once per line and cached
+    /// (`SyntaxHighlightCache`), keyed on language + line kind + content,
+    /// so scrolling past an already-rendered line never re-tokenizes it.
+    /// Approved mockup: https://claude.ai/code/artifact/e8dcd7a7 -- add/del
+    /// backgrounds stay exactly as they are; syntax colors render within
+    /// the line, never replacing the diff-identity color scheme.
+    private var highlighted: AttributedString {
+        let text = line.content.isEmpty ? " " : line.content
+        return SyntaxHighlightCache.shared.highlighted(text, language: language, kind: line.type, baseColor: color)
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             Text(gutterText)
@@ -451,9 +466,8 @@ private struct DiffLineView: View {
                 .padding(.leading, 2)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                Text(line.content.isEmpty ? " " : line.content)
+                Text(highlighted)
                     .font(.system(size: 10.5, design: .monospaced))
-                    .foregroundStyle(color)
                     .lineLimit(1)
                     .padding(.trailing, 8)
             }

@@ -104,7 +104,7 @@ struct ChatView: View {
                                 .id(item.id)
                         }
                         ForEach(chat.pendingSends, id: \.self) { text in
-                            UserBubble(text: text, pending: true)
+                            UserMessageRow(text: text, pending: true)
                         }
                         if !chat.streamingText.isEmpty {
                             AssistantText(streaming: chat.streamingText)
