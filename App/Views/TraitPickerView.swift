@@ -1,12 +1,14 @@
 import SwiftUI
 
-/// Full-screen trait picker: every trait always visible, tap to toggle.
-/// Same visual language as ProviderPickerView (name + description row,
-/// filled/empty circle for selection state, accent-tinted row background
-/// while selected) but multi-select -- tapping a row toggles it in place
-/// rather than dismissing the screen, mirroring the CLI's trait-picker
-/// Space key (~/repos/barry/cli/src/prompts/trait-picker.ts) translated
-/// to touch.
+/// Full-screen trait picker: every trait filterable by search, tap to
+/// toggle. Same visual language as ProviderPickerView (name + description
+/// row, filled/empty circle for selection state, accent-tinted row
+/// background while selected) but multi-select -- tapping a row toggles it
+/// in place rather than dismissing the screen, mirroring the CLI's
+/// trait-picker Space key (~/repos/barry/cli/src/prompts/trait-picker.ts)
+/// translated to touch. Search mirrors that same picker's type-to-filter --
+/// with 119 real traits (confirmed against the live API), a flat list
+/// without it is not usable.
 ///
 /// Zero traits selected is the normal, fully-supported starting state
 /// (matches the web app's NewSessionModal, which also defaults to none
@@ -19,6 +21,29 @@ struct TraitPickerView: View {
 
     @State private var traits: [Trait] = []
     @State private var loadError: String?
+    @State private var searchText = ""
+
+    /// Name match first (what someone actually types to find a specific
+    /// trait), description match second -- both case-insensitive substring,
+    /// matching the CLI picker's own fuzzy-but-simple filtering rather than
+    /// requiring an exact prefix.
+    private var filteredTraits: [Trait] {
+        guard !searchText.isEmpty else { return traits }
+        let query = searchText.lowercased()
+        return traits.filter {
+            $0.name.lowercased().contains(query) || $0.description.lowercased().contains(query)
+        }
+    }
+
+    /// Traits the user already picked stay visible above the fold even
+    /// while a search query hides them from the filtered list below --
+    /// losing sight of a selection because it scrolled off-filter would be
+    /// a real usability trap with 119 items.
+    private var selectedNotInFilter: [Trait] {
+        guard !searchText.isEmpty else { return [] }
+        let filteredNames = Set(filteredTraits.map(\.name))
+        return traits.filter { selection.contains($0.name) && !filteredNames.contains($0.name) }
+    }
 
     var body: some View {
         NavigationStack {
@@ -29,40 +54,30 @@ struct TraitPickerView: View {
                     } description: {
                         Text(loadError)
                     }
+                } else if traits.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    List(traits) { trait in
-                        let isSelected = selection.contains(trait.name)
-                        Button {
-                            toggle(trait.name)
-                        } label: {
-                            HStack(spacing: 11) {
-                                VStack(alignment: .leading, spacing: 1) {
-                                    Text(trait.name)
-                                        .font(.body.weight(.semibold))
-                                        .foregroundStyle(isSelected ? Theme.accent : .primary)
-                                    if !trait.description.isEmpty {
-                                        Text(trait.description)
-                                            .font(.caption)
-                                            .foregroundStyle(.tertiary)
-                                            .lineLimit(1)
-                                    }
-                                }
-                                Spacer()
-                                if isSelected {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(Theme.accent)
-                                } else {
-                                    Image(systemName: "circle")
-                                        .foregroundStyle(.tertiary.opacity(0.5))
+                    List {
+                        if !selectedNotInFilter.isEmpty {
+                            Section("Selected") {
+                                ForEach(selectedNotInFilter) { trait in
+                                    traitRow(trait)
                                 }
                             }
-                            .padding(.vertical, 2)
                         }
-                        .buttonStyle(.plain)
-                        .listRowBackground(isSelected ? Theme.accent.opacity(0.08) : Color.clear)
-                        .accessibilityIdentifier("trait-\(trait.name)")
+                        Section {
+                            ForEach(filteredTraits) { trait in
+                                traitRow(trait)
+                            }
+                        }
+                        if filteredTraits.isEmpty && !searchText.isEmpty {
+                            ContentUnavailableView.search(text: searchText)
+                                .listRowSeparator(.hidden)
+                        }
                     }
                     .listStyle(.plain)
+                    .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search traits")
                 }
             }
             .navigationTitle("Traits")
@@ -92,6 +107,39 @@ struct TraitPickerView: View {
                 }
             }
         }
+    }
+
+    private func traitRow(_ trait: Trait) -> some View {
+        let isSelected = selection.contains(trait.name)
+        return Button {
+            toggle(trait.name)
+        } label: {
+            HStack(spacing: 11) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(trait.name)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(isSelected ? Theme.accent : .primary)
+                    if !trait.description.isEmpty {
+                        Text(trait.description)
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Theme.accent)
+                } else {
+                    Image(systemName: "circle")
+                        .foregroundStyle(.tertiary.opacity(0.5))
+                }
+            }
+            .padding(.vertical, 2)
+        }
+        .buttonStyle(.plain)
+        .listRowBackground(isSelected ? Theme.accent.opacity(0.08) : Color.clear)
+        .accessibilityIdentifier("trait-\(trait.name)")
     }
 
     private func toggle(_ name: String) {
