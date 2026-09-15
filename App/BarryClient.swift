@@ -9,9 +9,26 @@ enum BarryError: LocalizedError {
         switch self {
         case .badURL: return "Invalid server URL"
         case .http(let code, let body):
-            return "Server error \(code)" + (body.isEmpty ? "" : ": \(body.prefix(200))")
+            return "Server error \(code)" + (Self.readableDetail(from: body).map { ": \($0)" } ?? "")
         case .decoding(let detail): return "Unexpected response: \(detail)"
         }
+    }
+
+    /// The API is inconsistent across routes: some return RFC 7807
+    /// problem+json ({title, detail}), others a plain {error} or {ok,
+    /// error} shape. Try both known shapes before falling back to the raw
+    /// body -- an unparsed JSON blob in an alert is exactly the kind of
+    /// "technically shown, practically unreadable" failure this exists to
+    /// avoid.
+    private static func readableDetail(from body: String) -> String? {
+        guard let data = body.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return body.isEmpty ? nil : String(body.prefix(200))
+        }
+        if let detail = obj["detail"] as? String, !detail.isEmpty { return detail }
+        if let error = obj["error"] as? String, !error.isEmpty { return error }
+        if let title = obj["title"] as? String, !title.isEmpty { return title }
+        return body.isEmpty ? nil : String(body.prefix(200))
     }
 }
 

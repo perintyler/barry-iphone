@@ -86,6 +86,50 @@ final class BarryUITests: XCTestCase {
         app.buttons["Cancel"].tap()
     }
 
+    /// Regression: a New Session failure produced NO visible feedback --
+    /// traced to the error rendering in a Form Section below the fold,
+    /// invisible without scrolling. This actually taps Start against the
+    /// real live API (breaking this suite's usual non-mutating discipline
+    /// for New Session tests, see testNewSessionSheetPopulatesFromRealAPI
+    /// above) because the only way to prove an alert appears on a REAL
+    /// failure is to trigger a real failure -- a mocked/local failure
+    /// would only prove the alert code compiles, not that create() really
+    /// reaches it. Safe to repeat: at the time this was written the create
+    /// endpoint was failing with a genuine server-side 500 that occurs
+    /// before any row is persisted (a SQL error on INSERT), so a failed
+    /// attempt here does not create orphaned draft sessions. If the server
+    /// bug is later fixed, this call may succeed instead -- the assertion
+    /// below only requires SOME outcome (alert or dismissal), not the
+    /// specific failure, so it keeps passing either way.
+    func testNewSessionShowsVisibleFeedbackOnFailure() throws {
+        let app = launch()
+        app.buttons["newSessionButton"].tap()
+        let prompt = app.textViews["newSessionPrompt"].firstMatch
+        XCTAssertTrue(prompt.waitForExistence(timeout: 10), "new session form should appear")
+        prompt.tap()
+        prompt.typeText("UI test probe — verifying error visibility, not creating a real session")
+        let start = app.buttons["startSessionButton"]
+        XCTAssertTrue(start.waitForExistence(timeout: 5))
+        start.tap()
+
+        // Either the alert appears (the failure case this test exists to
+        // catch), or the sheet dismisses because creation actually
+        // succeeded (the server bug got fixed) -- both are healthy
+        // outcomes; only "nothing happens and the form just sits there"
+        // (the original bug report) is not.
+        let alert = app.alerts["Couldn't start session"]
+        let alertAppeared = alert.waitForExistence(timeout: 15)
+        let sheetDismissed = !prompt.exists
+        if !alertAppeared && !sheetDismissed {
+            attach(app, name: "new-session-no-feedback-failure")
+        }
+        XCTAssertTrue(alertAppeared || sheetDismissed, "creation must either show an alert or succeed — never leave the form sitting with no feedback")
+        if alertAppeared {
+            attach(app, name: "new-session-error-alert")
+            alert.buttons["OK"].tap()
+        }
+    }
+
     /// Trait picker: opens from the New Session form, lists real traits from
     /// the live API, and multi-select actually works -- tapping two rows
     /// leaves both checked and the row's live count reflects it. Cancels

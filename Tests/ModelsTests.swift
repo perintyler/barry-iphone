@@ -155,6 +155,42 @@ final class ModelsTests: XCTestCase {
         let https = ServerConfig(baseURL: "https://barry.works", hostHeader: "", secret: "")
         XCTAssertEqual(https.webSocketURL?.absoluteString, "wss://barry.works/api/v1/ws")
     }
+
+    /// Regression: a New Session failure showed no visible feedback at all
+    /// -- traced to two compounding bugs: the error Section rendered below
+    /// the fold in the Form (fixed separately, now an .alert), and this
+    /// message-extraction logic not handling the API's actual real error
+    /// shapes. The server is genuinely inconsistent: RFC 7807 problem+json
+    /// ({title, detail}) on some routes, a plain {error} on others -- both
+    /// fixtures below are real shapes pulled from the live API, not
+    /// invented ones.
+    func testBarryErrorExtractsReadableDetailFromProblemJSON() {
+        let body = #"{"type":"about:blank","title":"Failed to create draft session","status":500,"instance":"/api/v1/sessions/draft"}"#
+        let error = BarryError.http(500, body)
+        XCTAssertEqual(error.errorDescription, "Server error 500: Failed to create draft session")
+    }
+
+    func testBarryErrorExtractsReadableDetailFromPlainErrorShape() {
+        let body = #"{"ok":false,"error":"Session has no working directory. Set repoPath in request body or update session first."}"#
+        let error = BarryError.http(400, body)
+        XCTAssertEqual(error.errorDescription, "Server error 400: Session has no working directory. Set repoPath in request body or update session first.")
+    }
+
+    func testBarryErrorPrefersDetailOverTitleWhenBothPresent() {
+        let body = #"{"title":"Invalid request","detail":"systemPrompt: Invalid input: expected string, received undefined"}"#
+        let error = BarryError.http(400, body)
+        XCTAssertEqual(error.errorDescription, "Server error 400: systemPrompt: Invalid input: expected string, received undefined")
+    }
+
+    func testBarryErrorFallsBackToRawBodyWhenUnparseable() {
+        let error = BarryError.http(502, "Bad Gateway")
+        XCTAssertEqual(error.errorDescription, "Server error 502: Bad Gateway")
+    }
+
+    func testBarryErrorHandlesEmptyBody() {
+        let error = BarryError.http(503, "")
+        XCTAssertEqual(error.errorDescription, "Server error 503")
+    }
 }
 
 /// Integration tests against the real local API. These make the client's

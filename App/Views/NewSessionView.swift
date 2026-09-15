@@ -93,11 +93,6 @@ struct NewSessionView: View {
                     }
                     .accessibilityIdentifier("traitsRow")
                 }
-                if let error {
-                    Section {
-                        Text(error).foregroundStyle(.red).font(.footnote)
-                    }
-                }
             }
             .navigationTitle("New Session")
             .navigationBarTitleDisplayMode(.inline)
@@ -141,7 +136,23 @@ struct NewSessionView: View {
             .onChange(of: selectedRepoPath) { _, _ in
                 Task { await resolveDefaults() }
             }
+            // An alert, not an inline Form section: the prior inline error
+            // rendered at the BOTTOM of the form, below Repository/First
+            // message/Provider/Model/Traits -- invisible without scrolling
+            // down, which from the user's actual scroll position after
+            // tapping Start read as "nothing happened" (confirmed: a real
+            // create() failure with no visible feedback). An alert can't be
+            // missed regardless of scroll position or keyboard state.
+            .alert("Couldn't start session", isPresented: errorAlertBinding) {
+                Button("OK", role: .cancel) { error = nil }
+            } message: {
+                Text(error ?? "")
+            }
         }
+    }
+
+    private var errorAlertBinding: Binding<Bool> {
+        Binding(get: { error != nil }, set: { if !$0 { error = nil } })
     }
 
     /// "claude-opus-5" when a real default is known and nothing's
