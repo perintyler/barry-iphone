@@ -273,6 +273,44 @@ struct WsEvent: Decodable {
     let error: String?
 }
 
+// MARK: - Diff
+
+/// The mode a diff view fetches: matches the server's `mode` query param.
+enum DiffMode: String {
+    case uncommitted
+    case branch
+    case commit
+}
+
+/// GET /api/v1/sessions/:id/diff — one shape for all three modes. The
+/// server's real response only ever carries the fields relevant to the
+/// mode requested (branch-only fields are absent for `mode=uncommitted`,
+/// etc.), so every mode-specific field is optional here rather than
+/// modeled as three separate response types -- one Decodable struct that
+/// matches the one real endpoint, same house style as `Message` handling
+/// both "text" and "tool_start" shapes in a single struct.
+///
+/// `diff` is RAW unified-diff text (`git diff --no-color`), unparsed by
+/// the server -- `DiffParser.parse(_:)` turns it into `[DiffFile]`.
+struct SessionDiff: Decodable, Equatable {
+    let sessionId: String
+    let repoPath: String
+    let mode: String
+    let diff: String
+    let hasStagedChanges: Bool?
+    let hasUnstagedChanges: Bool?
+    let hasUntrackedFiles: Bool?
+    let baseBranch: String?
+    let currentBranch: String?
+    let onMainBranch: Bool?
+    let commit: String?
+
+    /// UTF-8 byte size of the raw diff text -- the input to every
+    /// threshold in `DiffThresholds` (auto-collapse, performance mode),
+    /// which are all specified in bytes, not characters.
+    var diffSizeBytes: Int { diff.utf8.count }
+}
+
 // MARK: - Dates
 
 enum ISO8601 {

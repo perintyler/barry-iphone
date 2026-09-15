@@ -166,4 +166,16 @@ struct BarryClient {
         struct Ack: Decodable { let ok: Bool }
         _ = try await post(Ack.self, path: "/api/v1/sessions/\(id)/archive", body: [:])
     }
+
+    /// Raw unified diff for a session's repo. `commit` is only sent (and
+    /// only meaningful) for `.commit` mode -- the server ignores it
+    /// otherwise, but this keeps the call site honest about which mode
+    /// actually uses it.
+    func diff(sessionId: String, mode: DiffMode, commit: String? = nil) async throws -> SessionDiff {
+        var query = [URLQueryItem(name: "mode", value: mode.rawValue)]
+        if mode == .commit, let commit, !commit.isEmpty {
+            query.append(URLQueryItem(name: "commit", value: commit))
+        }
+        return try await get(SessionDiff.self, path: "/api/v1/sessions/\(sessionId)/diff", query: query)
+    }
 }

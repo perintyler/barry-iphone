@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		047A2A14D27389CCC5106EE3 /* BarrySocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BC5C87D15D36DA4B172502 /* BarrySocket.swift */; };
 		069E7CA0BE52941C2FCECC62 /* ProviderPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D186517382D5D513389F77 /* ProviderPickerView.swift */; };
+		0BB6C57ED98ADD5CE2FB148B /* branch-real.diff in Resources */ = {isa = PBXBuildFile; fileRef = CE224CF66B4C97A33459B58A /* branch-real.diff */; };
 		0EDAE32DFFDE33405B2239FF /* BarryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E69EBB984C4A02A753709F /* BarryApp.swift */; };
 		0FF7249D795CF44D2C0EEA17 /* TraitPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF45E6BCC1D548B8E4F42443 /* TraitPickerView.swift */; };
 		1FF0DBCCC316F9EB0EEF6730 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295E4CC1C22134DEBA7E815D /* Theme.swift */; };
@@ -22,8 +23,12 @@
 		742D443B33BB08EC6AED6953 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8360A0C12E8262F1FF7C1 /* SettingsView.swift */; };
 		A1702628A501CD85B2E965CD /* SessionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90719416ADE95C8796430FCC /* SessionsView.swift */; };
 		A923F7D232250DE735ACBE19 /* BarryClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426A0A5C30D5CD32D98FEFE0 /* BarryClient.swift */; };
+		B1F802D5785FEE52B803AD82 /* DiffParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2CAB0018F2A48BF0CF9405C /* DiffParserTests.swift */; };
+		C85A3C0B22CB2DD9A6AA3042 /* uncommitted-real.diff in Resources */ = {isa = PBXBuildFile; fileRef = E0783053B0A9BBD99C908B1F /* uncommitted-real.diff */; };
+		D1FA2B9FF8C8441C633C6148 /* DiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08734282A228AB98498A663F /* DiffView.swift */; };
 		D4C3BEC02506AC4AF6466CB2 /* ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82541CAA5B38B0BC4F4F7841 /* ModelsTests.swift */; };
 		D6F6C78DD558E450279C8CCD /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C626925C7F4E3F562020EE /* ChatView.swift */; };
+		DDA13FCE298258FAE8138754 /* DiffParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F90CD55FF9CB859395CFD38E /* DiffParser.swift */; };
 		E3E90F94DBF145CE041A71AA /* MessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */; };
 		F20E64A06D8C172F9651AA33 /* NewSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4866CB2DD44AE19329A0BC89 /* NewSessionView.swift */; };
 /* End PBXBuildFile section */
@@ -47,6 +52,7 @@
 
 /* Begin PBXFileReference section */
 		03E69EBB984C4A02A753709F /* BarryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarryApp.swift; sourceTree = "<group>"; };
+		08734282A228AB98498A663F /* DiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffView.swift; sourceTree = "<group>"; };
 		0AB1843FA0431EC1E29810D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0B9960D55344A78CD3D51700 /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
 		16573501A843EA0279C99C70 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
@@ -67,11 +73,24 @@
 		AC997F223D9EBF2CACE43BC2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BF45E6BCC1D548B8E4F42443 /* TraitPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraitPickerView.swift; sourceTree = "<group>"; };
 		C7E99C95867D5B1AAC8D1096 /* ModelPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPickerView.swift; sourceTree = "<group>"; };
+		CE224CF66B4C97A33459B58A /* branch-real.diff */ = {isa = PBXFileReference; path = "branch-real.diff"; sourceTree = "<group>"; };
+		E0783053B0A9BBD99C908B1F /* uncommitted-real.diff */ = {isa = PBXFileReference; path = "uncommitted-real.diff"; sourceTree = "<group>"; };
 		E1A2BFB100BA9F0EF6437514 /* ServerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConfig.swift; sourceTree = "<group>"; };
+		E2CAB0018F2A48BF0CF9405C /* DiffParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffParserTests.swift; sourceTree = "<group>"; };
 		F08AB4623C5D33768E74DF13 /* BarryUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BarryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F90CD55FF9CB859395CFD38E /* DiffParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffParser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		039CE6C20C3BCE97212899B4 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				CE224CF66B4C97A33459B58A /* branch-real.diff */,
+				E0783053B0A9BBD99C908B1F /* uncommitted-real.diff */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
 		11C8B6E5BDD22AFCB3606E67 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -81,6 +100,7 @@
 				426A0A5C30D5CD32D98FEFE0 /* BarryClient.swift */,
 				56BC5C87D15D36DA4B172502 /* BarrySocket.swift */,
 				0B9960D55344A78CD3D51700 /* ChatStore.swift */,
+				F90CD55FF9CB859395CFD38E /* DiffParser.swift */,
 				0AB1843FA0431EC1E29810D3 /* Info.plist */,
 				367862B7C75C5757C631C2C4 /* Models.swift */,
 				E1A2BFB100BA9F0EF6437514 /* ServerConfig.swift */,
@@ -121,7 +141,9 @@
 		B3D1C2A5B0D9F47640EFC9F8 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				E2CAB0018F2A48BF0CF9405C /* DiffParserTests.swift */,
 				82541CAA5B38B0BC4F4F7841 /* ModelsTests.swift */,
+				039CE6C20C3BCE97212899B4 /* Fixtures */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -130,6 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				37C626925C7F4E3F562020EE /* ChatView.swift */,
+				08734282A228AB98498A663F /* DiffView.swift */,
 				2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */,
 				C7E99C95867D5B1AAC8D1096 /* ModelPickerView.swift */,
 				4866CB2DD44AE19329A0BC89 /* NewSessionView.swift */,
@@ -185,6 +208,7 @@
 			buildConfigurationList = 934042CBB656E6181E81C3C4 /* Build configuration list for PBXNativeTarget "BarryTests" */;
 			buildPhases = (
 				0E93E47B5B589E2976478411 /* Sources */,
+				87B920C4216C329906047818 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -234,6 +258,15 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		87B920C4216C329906047818 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0BB6C57ED98ADD5CE2FB148B /* branch-real.diff in Resources */,
+				C85A3C0B22CB2DD9A6AA3042 /* uncommitted-real.diff in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F647D916B531A4C4F3C4E254 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -249,6 +282,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1F802D5785FEE52B803AD82 /* DiffParserTests.swift in Sources */,
 				D4C3BEC02506AC4AF6466CB2 /* ModelsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -271,6 +305,8 @@
 				047A2A14D27389CCC5106EE3 /* BarrySocket.swift in Sources */,
 				65D900EFA5D87CE2F52E5010 /* ChatStore.swift in Sources */,
 				D6F6C78DD558E450279C8CCD /* ChatView.swift in Sources */,
+				DDA13FCE298258FAE8138754 /* DiffParser.swift in Sources */,
+				D1FA2B9FF8C8441C633C6148 /* DiffView.swift in Sources */,
 				E3E90F94DBF145CE041A71AA /* MessageRow.swift in Sources */,
 				2E5042D78A35F90AE439F967 /* ModelPickerView.swift in Sources */,
 				689BCE3FA7267B2649A7EA72 /* Models.swift in Sources */,

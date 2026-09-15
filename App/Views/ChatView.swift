@@ -39,6 +39,14 @@ struct ChatView: View {
                     }
                 }
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    DiffView(session: session, config: store.config)
+                } label: {
+                    Image(systemName: "arrow.left.arrow.right")
+                }
+                .accessibilityIdentifier("diffViewButton")
+            }
         }
         .task {
             chat.start(config: store.config)

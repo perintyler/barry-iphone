@@ -1,0 +1,196 @@
+diff --git a/README.md b/README.md
+index af1b59f..acf2bea 100644
+--- a/README.md
++++ b/README.md
+@@ -1,65 +1,5 @@
+-# Barry bags
++# Barry Bags
+ 
+-One clone for every Barry bag that lives outside the `barry` monorepo.
++External bags that live outside the Barry monorepo.
+ 
+-```bash
+-git clone --recurse-submodules git@github.com:perintyler/bags.git ~/repos/bags
+-cd ~/repos/bags
+-./scripts/sync-vendored.sh    # clone the upstream skill repos
+-./scripts/check-layout.sh     # verify barry is a sibling and deps are installed
+-```
+-
+-Bags must sit at `~/repos/bags/<name>` with `barry` checked out as a sibling
+-at `~/repos/barry` — each bag depends on `@barry/tools` through a relative
+-`link:../../barry/packages/tools`, so the layout is load-bearing.
+-
+-## What is here
+-
+-**Submodules** — bags we own, each its own `perintyler/<name>-bag` repo.
+-They keep independent history and can be cloned or shared alone.
+-
+-**Vendored** (`scripts/sync-vendored.sh`) — upstream skill repos owned by other
+-organizations: `clickhouse-skills`, `temporal-design-skill`,
+-`temporal-developer-skill`. Cloned rather than submoduled, because a submodule
+-would pin a commit we do not control and turn every upstream bump into a commit
+-here. They carry no `bag.yaml` and are not registered as bags.
+-
+-**Untracked** — anything else in this directory is a local working copy that has
+-not been given a repo yet. As of the bags rename every bag here is a submodule;
+-`PUBLIC_BAGS.yaml` records which of their repos are public.
+-
+-## CI
+-
+-`.github/workflows/ci.yml` installs and typechecks every bag, and runs tests
+-for the ones that define them.
+-
+-It lives here rather than in each bag repo for a practical reason: a bag
+-resolves `@barry/tools` through a relative link, so any CI has to check out
+-barry beside it. Per-repo workflows would mean 20+ copies each holding a deploy
+-key for a private repo. This repo already has every bag as a submodule, so one
+-workflow covers them all.
+-
+-Only the public submodules are built. The default `GITHUB_TOKEN` cannot read a
+-private submodule, and the one private submodule (`vantage-bags`) holds nested
+-bags with no top-level `package.json`, so the build loop skips it anyway. To
+-build a private bag later, add a PAT with repo scope as a `BAGS_TOKEN` secret
+-and pass it to the checkout step.
+-
+-## Working on a bag
+-
+-Each submodule is an ordinary repo. Commit and push inside it as usual; the
+-pointer in this repo only moves when you commit the updated submodule here:
+-
+-```bash
+-cd linear && git commit -am "..." && git push
+-cd .. && git add linear && git commit -m "bump linear"
+-```
+-
+-Forgetting that second step is the usual submodule papercut — the bag is
+-pushed, but this repo still points at the old commit.
+-
+-## After cloning
+-
+-`pnpm install` inside each bag. A bag with no `node_modules` fails its build
+-loudly (`Could not resolve "@barry/tools"`) rather than silently resolving
+-through the monorepo.
++See the [Barry bags docs](https://github.com/perintyler/barry/blob/master/docs/bags.md).
+diff --git a/ableton b/ableton
+index 67d5718..de77352 160000
+--- a/ableton
++++ b/ableton
+@@ -1 +1 @@
+-Subproject commit 67d571841ef6411b05dab44943eb78e85dd3ba1f
++Subproject commit de773527c5044d71f6531bd0b7596727572c80dc
+diff --git a/audio-engineering b/audio-engineering
+index 6f9bb84..5b58f8e 160000
+--- a/audio-engineering
++++ b/audio-engineering
+@@ -1 +1 @@
+-Subproject commit 6f9bb8414d71d68ff53e6ac04966092dde3c3430
++Subproject commit 5b58f8e96efc441066938859608c59809d9bef0b
+diff --git a/axiom b/axiom
+index ea57ce8..5db1f48 160000
+--- a/axiom
++++ b/axiom
+@@ -1 +1 @@
+-Subproject commit ea57ce856c2b8f630de179bb6f6a6eaf5516a139
++Subproject commit 5db1f481d66f31d23d52362ea0195d99176778f1
+diff --git a/barry-devops b/barry-devops
+index e4e7819..da201de 160000
+--- a/barry-devops
++++ b/barry-devops
+@@ -1 +1 @@
+-Subproject commit e4e7819d6e54f98fe2df6070522154583deb3e6e
++Subproject commit da201de5f87b058e341da45d18343012a1fcd347
+diff --git a/barry.works b/barry.works
+index 3b6703b..eb7213a 160000
+--- a/barry.works
++++ b/barry.works
+@@ -1 +1 @@
+-Subproject commit 3b6703baa906f8c547d4f134fda7a91584a3dad2
++Subproject commit eb7213a8407310ea6ea9c911a9eab182278da8b7
+diff --git a/clickhouse b/clickhouse
+index 3c32546..f881a48 160000
+--- a/clickhouse
++++ b/clickhouse
+@@ -1 +1 @@
+-Subproject commit 3c325466d2a46f36091d7d2d0cfd0c390358b493
++Subproject commit f881a484978231fa77d9c01cc407840fb5a49972
+diff --git a/cloudflare b/cloudflare
+--- a/cloudflare
++++ b/cloudflare
+@@ -1 +1 @@
+-Subproject commit bf20fe463501e3f05e2c9674535b8833bfa83d33
++Subproject commit bf20fe463501e3f05e2c9674535b8833bfa83d33-dirty
+diff --git a/coding b/coding
+index b1bc81a..0833614 160000
+--- a/coding
++++ b/coding
+@@ -1 +1 @@
+-Subproject commit b1bc81ab41ae0edff95c15aece59e69ba000b608
++Subproject commit 0833614fa0ad35ce72d228829d2663159d1045e6
+diff --git a/devops b/devops
+index a9cae95..40e0373 160000
+--- a/devops
++++ b/devops
+@@ -1 +1 @@
+-Subproject commit a9cae95273f137b49936c1722db87e10b836bf9a
++Subproject commit 40e03732b2682f17af7251708bbb611a4aab9663
+diff --git a/digital-storytelling b/digital-storytelling
+index 9b00dc7..38c3154 160000
+--- a/digital-storytelling
++++ b/digital-storytelling
+@@ -1 +1 @@
+-Subproject commit 9b00dc764d4c830935e498a6d89d7d34ced9ec7f
++Subproject commit 38c31542c735a0001d012a38676c87f0ed3c1208
+diff --git a/gifs b/gifs
+index a362fbe..006d636 160000
+--- a/gifs
++++ b/gifs
+@@ -1 +1 @@
+-Subproject commit a362fbe83fedaef8d8ec8eef24b1fb0762543dba
++Subproject commit 006d636a918fa6d3a27d178383f1153ac3d55980
+diff --git a/macos-pages b/macos-pages
+index 0b3cf94..d9bcce1 160000
+--- a/macos-pages
++++ b/macos-pages
+@@ -1 +1 @@
+-Subproject commit 0b3cf94275bda3c5b7cfc0d96765f2c2d1fb2f93
++Subproject commit d9bcce113ace755b194513864bd6854f0597c3b3
+diff --git a/metrics b/metrics
+index b53cba5..43d5541 160000
+--- a/metrics
++++ b/metrics
+@@ -1 +1 @@
+-Subproject commit b53cba54e7ba65cb3ad31df364b05651379dea3d
++Subproject commit 43d5541f13d39157d12be5d9f29fa4bc0b067792
+diff --git a/plans b/plans
+index b74dfac..49ce75f 160000
+--- a/plans
++++ b/plans
+@@ -1 +1 @@
+-Subproject commit b74dfacabf8898ccf889e2f87ff8befd5a598e07
++Subproject commit 49ce75fa72bad2fa318ed6dcc71c97205d686448-dirty
+diff --git a/playwright b/playwright
+--- a/playwright
++++ b/playwright
+@@ -1 +1 @@
+-Subproject commit fbe63251050795a9921f3c8c9e51cc2b9938aaab
++Subproject commit fbe63251050795a9921f3c8c9e51cc2b9938aaab-dirty
+diff --git a/scout b/scout
+--- a/scout
++++ b/scout
+@@ -1 +1 @@
+-Subproject commit d296339e22e4672d29b08b38ee01d6afd115c9e9
++Subproject commit d296339e22e4672d29b08b38ee01d6afd115c9e9-dirty
+diff --git a/slack b/slack
+index 5c046b9..a45d774 160000
+--- a/slack
++++ b/slack
+@@ -1 +1 @@
+-Subproject commit 5c046b9f30d61a70a9edb2b43a21c8c98248e83b
++Subproject commit a45d774d9c788767437aac1e2011646d9945452e
+diff --git a/vantage-bags b/vantage-bags
+index 651f9bb..b4eb91c 160000
+--- a/vantage-bags
++++ b/vantage-bags
+@@ -1 +1 @@
+-Subproject commit 651f9bb8acc3ff37a672fe00fe4fac59dc4a57da
++Subproject commit b4eb91cff4330c4a0ef6cd7d37b75a1e1926f61e

@@ -294,4 +294,33 @@ final class LiveAPITests: XCTestCase {
         // notice and wonder about.
         try? await client.archiveSession(id: session.id)
     }
+
+    /// Fetches a REAL diff from the real running API and confirms the
+    /// parser handles it without crashing. Searches a page of real sessions
+    /// for one whose repo actually has uncommitted changes right now (most
+    /// sessions on a real machine have a clean tree) -- skips, rather than
+    /// fails, if none currently do, since that's a property of the
+    /// developer's working directories at test time, not of this app.
+    func testFetchesAndParsesRealUncommittedDiff() async throws {
+        try await requireServer()
+        let client = BarryClient(config: config)
+        let page = try await client.sessions(limit: 50)
+        var found: (Session, SessionDiff)?
+        for session in page.sessions {
+            guard let diff = try? await client.diff(sessionId: session.id, mode: .uncommitted),
+                  !diff.diff.isEmpty else { continue }
+            found = (session, diff)
+            break
+        }
+        guard let (session, diff) = found else {
+            throw XCTSkip("no session's repo currently has uncommitted changes")
+        }
+        XCTAssertEqual(diff.mode, "uncommitted")
+        XCTAssertEqual(diff.sessionId, session.id)
+        let files = DiffParser.parse(diff.diff)
+        XCTAssertGreaterThan(files.count, 0, "a non-empty diff must parse to at least one file")
+        for file in files {
+            XCTAssertFalse(file.displayName.isEmpty)
+        }
+    }
 }
