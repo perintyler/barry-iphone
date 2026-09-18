@@ -5,43 +5,56 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var baseURL = ""
-    @State private var hostHeader = ""
     @State private var secret = ""
-    @State private var testResult: TestResult?
-
-    enum TestResult { case ok, failed(String) }
+    @State private var outcome: ProbeOutcome?
+    @State private var isProbing = false
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Server URL", text: $baseURL)
+                    TextField(ServerConfig.defaultDeviceURL, text: $baseURL)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .accessibilityIdentifier("serverURLField")
-                    TextField("Host header (optional)", text: $hostHeader)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    SecureField("Secret (optional)", text: $secret)
+                    SecureField("BARRY_SECRET (required on the tailnet)", text: $secret)
+                        .accessibilityIdentifier("secretField")
                 } header: {
                     Text("Server")
                 } footer: {
-                    Text("On Tailscale, use your Mac's address with host header barry.lan.")
+                    Text("On a phone the app reaches the Mac over the tailnet at "
+                         + "\(ServerConfig.defaultDeviceURL). The secret is required "
+                         + "there — the server rejects an unauthenticated request.")
                 }
                 Section {
-                    Button("Test connection") { Task { await test() } }
-                    switch testResult {
-                    case .ok:
-                        Label("Connected", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                    case .failed(let reason):
-                        Label(reason, systemImage: "xmark.circle.fill")
-                            .foregroundStyle(.red)
-                            .font(.footnote)
-                    case nil:
-                        EmptyView()
+                    Button {
+                        Task { await probe() }
+                    } label: {
+                        HStack {
+                            Text("Test connection")
+                            if isProbing {
+                                Spacer()
+                                ProgressView()
+                            }
+                        }
                     }
+                    .disabled(isProbing)
+                    .accessibilityIdentifier("testConnectionButton")
+
+                    if let outcome {
+                        Label {
+                            Text(outcome.message)
+                        } icon: {
+                            Image(systemName: icon(for: outcome))
+                        }
+                        .foregroundStyle(tint(for: outcome))
+                        .font(.footnote)
+                        .accessibilityIdentifier("probeResult")
+                    }
+                } footer: {
+                    Text("Makes a real request. It tells apart a server that is not "
+                         + "reachable from one that is reachable but refused the secret.")
                 }
             }
             .navigationTitle("Settings")
@@ -59,26 +72,35 @@ struct SettingsView: View {
             }
             .onAppear {
                 baseURL = store.config.baseURL
-                hostHeader = store.config.hostHeader
                 secret = store.config.secret
             }
         }
     }
 
+    /// Three states, not two: a 403 proved the network path works, so it must
+    /// not wear the same red X as a host that never answered.
+    private func icon(for outcome: ProbeOutcome) -> String {
+        if outcome.isFullyWorking { return "checkmark.circle" }
+        return outcome.isReachable ? "exclamationmark.triangle" : "xmark.circle"
+    }
+
+    private func tint(for outcome: ProbeOutcome) -> Color {
+        if outcome.isFullyWorking { return .green }
+        return outcome.isReachable ? .orange : .red
+    }
+
     private func currentConfig() -> ServerConfig {
         ServerConfig(
             baseURL: baseURL.trimmingCharacters(in: .whitespaces),
-            hostHeader: hostHeader.trimmingCharacters(in: .whitespaces),
             secret: secret
         )
     }
 
-    private func test() async {
-        let client = BarryClient(config: currentConfig())
-        do {
-            testResult = try await client.health() ? .ok : .failed("Server said not-ok")
-        } catch {
-            testResult = .failed(error.localizedDescription)
-        }
+    /// Probes with the values currently ON SCREEN, not the saved ones, so the
+    /// button answers "will these work" rather than "did the old ones".
+    private func probe() async {
+        isProbing = true
+        defer { isProbing = false }
+        outcome = await ConnectionProbe(config: currentConfig()).run()
     }
 }

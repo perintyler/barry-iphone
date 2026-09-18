@@ -189,15 +189,22 @@ final class BarryUITests: XCTestCase {
         attach(app, name: "unreachable-server")
     }
 
+    /// The probe must report the SPECIFIC outcome, not a bare "failed". Against
+    /// the local proxy — which injects the secret — that outcome is the fully
+    /// working one, so the assertion is on the wording a working connection
+    /// produces rather than on the row merely appearing.
     func testSettingsOpensAndTestsConnection() throws {
         let app = launch()
         app.buttons["settingsButton"].tap()
         let field = app.textFields["serverURLField"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
-        app.buttons["Test connection"].tap()
-        let connected = app.staticTexts["Connected"]
-        XCTAssertTrue(connected.waitForExistence(timeout: 10), "health check should pass against local server")
+        app.buttons["testConnectionButton"].tap()
+
+        let result = app.staticTexts["probeResult"]
+        XCTAssertTrue(result.waitForExistence(timeout: 15), "the probe must say what it found")
         attach(app, name: "settings")
+        XCTAssertTrue(result.label.contains("Connected and authorized"),
+                      "the local proxy injects the secret, so the probe should be fully working, got: \(result.label)")
     }
 
     /// Opens a real session's diff view from the chat toolbar and confirms

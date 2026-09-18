@@ -14,6 +14,7 @@
 		0EDAE32DFFDE33405B2239FF /* BarryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E69EBB984C4A02A753709F /* BarryApp.swift */; };
 		0FF7249D795CF44D2C0EEA17 /* TraitPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF45E6BCC1D548B8E4F42443 /* TraitPickerView.swift */; };
 		17951344ECF65E7DC9F730B7 /* MessageCollapseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7694AFF3A72583DDAB32B31D /* MessageCollapseTests.swift */; };
+		18FFEDDA27C639F99A8CA036 /* ConnectionProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3408E392F66101B656AB41B4 /* ConnectionProbe.swift */; };
 		1FF0DBCCC316F9EB0EEF6730 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295E4CC1C22134DEBA7E815D /* Theme.swift */; };
 		2765C90EB84E30208A44DFF4 /* BookkeepingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC9E092EA39C9681089DAF8 /* BookkeepingView.swift */; };
 		27CDDFAFA814812BA47B153A /* MessageGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7713DDB02D0B1AEAFF028D1E /* MessageGrouping.swift */; };
@@ -24,6 +25,7 @@
 		428014EADD8008BE8FC57DC8 /* BarryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E905712AFEFC34CC590D4E /* BarryUITests.swift */; };
 		4BB3852EFC6622080291E214 /* SyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20429F20F7EC35EE914FC4EA /* SyntaxHighlighter.swift */; };
 		52DC91CE432DC9BF6C366A37 /* bookkeeping-ekp-real.txt in Resources */ = {isa = PBXBuildFile; fileRef = 179AB3AA1453CDAAE5967A8F /* bookkeeping-ekp-real.txt */; };
+		57C3E47648DB3ADD1980B289 /* ConnectionProbeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD59C3945060590EF289129 /* ConnectionProbeTests.swift */; };
 		6235CF11A30ABB02E9DBBE4D /* tool-run-kpd-real.json in Resources */ = {isa = PBXBuildFile; fileRef = 1F5BB1ED5B8BAA59B7D2F53A /* tool-run-kpd-real.json */; };
 		65A1CD081FB0E2BF89C752FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC997F223D9EBF2CACE43BC2 /* Assets.xcassets */; };
 		65D900EFA5D87CE2F52E5010 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B9960D55344A78CD3D51700 /* ChatStore.swift */; };
@@ -83,6 +85,7 @@
 		20429F20F7EC35EE914FC4EA /* SyntaxHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighter.swift; sourceTree = "<group>"; };
 		295E4CC1C22134DEBA7E815D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		2D5C6CD847E81441B56E2DD6 /* MessageRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageRow.swift; sourceTree = "<group>"; };
+		3408E392F66101B656AB41B4 /* ConnectionProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionProbe.swift; sourceTree = "<group>"; };
 		35E4502E300AAD655AACF2B2 /* MessageGroupingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageGroupingTests.swift; sourceTree = "<group>"; };
 		367862B7C75C5757C631C2C4 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		37C626925C7F4E3F562020EE /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -118,6 +121,7 @@
 		E1A2BFB100BA9F0EF6437514 /* ServerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConfig.swift; sourceTree = "<group>"; };
 		E2CAB0018F2A48BF0CF9405C /* DiffParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffParserTests.swift; sourceTree = "<group>"; };
 		E5D8ED5B08A82EE22156DF61 /* SyntaxHighlighterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighterTests.swift; sourceTree = "<group>"; };
+		EDD59C3945060590EF289129 /* ConnectionProbeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionProbeTests.swift; sourceTree = "<group>"; };
 		F08AB4623C5D33768E74DF13 /* BarryUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BarryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F90CD55FF9CB859395CFD38E /* DiffParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffParser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -156,6 +160,7 @@
 				56BC5C87D15D36DA4B172502 /* BarrySocket.swift */,
 				D6D157E513972A66B31E93AA /* BookkeepingParser.swift */,
 				0B9960D55344A78CD3D51700 /* ChatStore.swift */,
+				3408E392F66101B656AB41B4 /* ConnectionProbe.swift */,
 				F90CD55FF9CB859395CFD38E /* DiffParser.swift */,
 				0AB1843FA0431EC1E29810D3 /* Info.plist */,
 				01C5768526ECBB29D5A9A229 /* JumpNavigation.swift */,
@@ -205,6 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				8614F12198C2E98DBF83C241 /* BookkeepingParserTests.swift */,
+				EDD59C3945060590EF289129 /* ConnectionProbeTests.swift */,
 				E2CAB0018F2A48BF0CF9405C /* DiffParserTests.swift */,
 				644B7030A09725496CC88621 /* JumpNavigationTests.swift */,
 				D9798D7E2376BFD7CB18FB18 /* MarkdownCacheTests.swift */,
@@ -363,6 +369,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3A310CA16EA3B94B16FC22F9 /* BookkeepingParserTests.swift in Sources */,
+				57C3E47648DB3ADD1980B289 /* ConnectionProbeTests.swift in Sources */,
 				B1F802D5785FEE52B803AD82 /* DiffParserTests.swift in Sources */,
 				3BB286DB0CE644E2E91163D5 /* JumpNavigationTests.swift in Sources */,
 				009A2B9AF8084F04DA94B7ED /* MarkdownCacheTests.swift in Sources */,
@@ -393,6 +400,7 @@
 				2765C90EB84E30208A44DFF4 /* BookkeepingView.swift in Sources */,
 				65D900EFA5D87CE2F52E5010 /* ChatStore.swift in Sources */,
 				D6F6C78DD558E450279C8CCD /* ChatView.swift in Sources */,
+				18FFEDDA27C639F99A8CA036 /* ConnectionProbe.swift in Sources */,
 				DDA13FCE298258FAE8138754 /* DiffParser.swift in Sources */,
 				D1FA2B9FF8C8441C633C6148 /* DiffView.swift in Sources */,
 				F6070E0F232B50EC1634AA4D /* JumpControls.swift in Sources */,

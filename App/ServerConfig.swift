@@ -2,25 +2,39 @@ import Foundation
 
 /// Where the app talks to Barry, and how it authenticates.
 ///
-/// Reaching the Mac:
-///  - Simulator: straight to the barry.works proxy on localhost.
-///  - Device: over Tailscale to the Mac, with a Host header so Caddy routes
-///    the request to the barry.works site block (which injects the API secret
-///    for trusted-network callers).
+///  - Simulator: straight to the barry.works proxy on localhost, which injects
+///    the API secret for loopback callers. Nothing to configure.
+///  - Device: HTTPS over the personal tailnet to a userspace `tailscaled`
+///    sidecar, which terminates TLS and proxies to the API on `127.0.0.1:4854`.
+///
+/// The device host is a real tailnet DNS name with a real Let's Encrypt
+/// certificate, so there is no certificate prompt and no pinning to do. It
+/// replaces the old `http://<tailscale-ip>` + `Host: barry.lan` Caddy route:
+/// that shape shipped a hardcoded IP that went stale within a day, and the
+/// sidecar's stable name removes the reason to edit an address at all.
+///
+/// The secret is REQUIRED on the device path. `:4854` rejects an unauthenticated
+/// caller with 403 even from loopback — only `/health` is open — so unlike the
+/// old proxy route there is nothing upstream filling the secret in.
 struct ServerConfig: Equatable {
     var baseURL: String
-    var hostHeader: String
     var secret: String
 
     static let defaultsKeyBase = "server.baseURL"
-    static let defaultsKeyHost = "server.hostHeader"
     static let keychainSecretKey = "rocks.barry.secret"
+
+    static let defaultDeviceURL = "https://barry-mac.tail5cb2f2.ts.net:8443"
+    static let simulatorURL = "http://127.0.0.1:9429"
+
+    /// The one route on the API that answers without a secret. The probe uses
+    /// it to tell "the server is not there" apart from "the secret is wrong".
+    static let healthPath = "/health"
 
     static var platformDefault: ServerConfig {
         #if targetEnvironment(simulator)
-        ServerConfig(baseURL: "http://127.0.0.1:9429", hostHeader: "", secret: "")
+        ServerConfig(baseURL: simulatorURL, secret: "")
         #else
-        ServerConfig(baseURL: "http://100.101.38.91", hostHeader: "barry.lan", secret: "")
+        ServerConfig(baseURL: defaultDeviceURL, secret: "")
         #endif
     }
 
@@ -31,21 +45,18 @@ struct ServerConfig: Equatable {
         // persisted settings. Never wired to anything but launch arguments.
         let args = ProcessInfo.processInfo.arguments
         if let flagIndex = args.firstIndex(of: "-barryBaseURL"), args.count > flagIndex + 1 {
-            return ServerConfig(baseURL: args[flagIndex + 1], hostHeader: "", secret: "")
+            return ServerConfig(baseURL: args[flagIndex + 1], secret: "")
         }
 
         let d = UserDefaults.standard
         var c = platformDefault
         if let base = d.string(forKey: defaultsKeyBase), !base.isEmpty { c.baseURL = base }
-        if let host = d.string(forKey: defaultsKeyHost) { c.hostHeader = host }
         c.secret = Keychain.read(key: keychainSecretKey) ?? ""
         return c
     }
 
     func save() {
-        let d = UserDefaults.standard
-        d.set(baseURL, forKey: Self.defaultsKeyBase)
-        d.set(hostHeader, forKey: Self.defaultsKeyHost)
+        UserDefaults.standard.set(baseURL, forKey: Self.defaultsKeyBase)
         if secret.isEmpty {
             Keychain.delete(key: Self.keychainSecretKey)
         } else {
@@ -53,7 +64,7 @@ struct ServerConfig: Equatable {
         }
     }
 
-    /// Build a request for an API path, applying host header and secret.
+    /// Build a request for an API path, applying auth.
     func request(path: String, query: [URLQueryItem] = []) -> URLRequest? {
         guard var components = URLComponents(string: baseURL) else { return nil }
         components.path = path
@@ -65,7 +76,6 @@ struct ServerConfig: Equatable {
     }
 
     func apply(to req: inout URLRequest) {
-        if !hostHeader.isEmpty { req.setValue(hostHeader, forHTTPHeaderField: "Host") }
         if !secret.isEmpty { req.setValue(secret, forHTTPHeaderField: "x-barry-secret") }
     }
 

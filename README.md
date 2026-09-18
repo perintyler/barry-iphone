@@ -31,9 +31,10 @@ no design system dependency:
   (see `Tests/ModelsTests.swift`, which pins fixtures captured from the
   live server).
 - `ServerConfig.swift` + `BarryClient.swift` — where the server is and how
-  to reach it (URLSession + a plain `Host` header, since the Mac terminates
-  Barry's Caddy routing on hostname, and a secret in the keychain). No
-  auto-discovery: you tell it where the Mac is once, in Settings.
+  to reach it (URLSession, and a secret in the keychain). The device address
+  is a stable tailnet name, so there is nothing to keep current — Settings
+  still overrides and persists it.
+- `ConnectionProbe.swift` — what "Test connection" actually proved.
 - `BarrySocket.swift` — the WebSocket layer, explicitly a UX accelerant,
   never a data source. If it never connects, the app still fully works —
   slower, on the poll interval.
@@ -44,14 +45,52 @@ no design system dependency:
 
 ## Reaching the Mac
 
-- **Simulator** (dev): talks straight to `http://127.0.0.1:9429`, the
-  barry.works proxy already running locally. No config needed.
-- **Real device**: needs the Mac's Tailscale IP and the `barry.lan` host
-  header (Caddy's `barry.works`/`barry.lan` site blocks share one proxy;
-  routing is by `Host:`, not path) — set both in Settings. A device on the
-  same tailnet is trusted network and doesn't need a secret; off-tailnet
-  needs the shared `BARRY_SECRET` too (see `packages/auth` in the main
-  repo for the trust rules this mirrors).
+Every Barry service binds `127.0.0.1`. There is **no route to a raw service
+port** from a phone.
+
+| | Base URL | Secret |
+|---|---|---|
+| Simulator | `http://127.0.0.1:9429` | not needed — the proxy injects one |
+| Device | `https://barry-mac.tail5cb2f2.ts.net:8443` | **required** |
+
+The device path goes over the user's PERSONAL tailnet to a userspace
+`tailscaled` sidecar (separate from the Mac's work Tailscale client), which
+terminates TLS and proxies to the API on `127.0.0.1:4854`.
+
+**The certificate is a real Let's Encrypt one**, issued for the tailnet name, so
+there is no certificate warning on the phone and nothing to pin or trust
+manually. That is why the app ships no `NSAllowsArbitraryLoads` — see below.
+
+**The secret is required on the device path.** `:4854` rejects an
+unauthenticated caller with 403 *even from loopback*; `/health` is the only open
+route. This is the opposite of the old Caddy route, where the barry.works proxy
+filled the secret in for trusted-network callers. A phone with no secret set
+gets a 403, which "Test connection" reports in those words.
+
+> **This replaces a stale hardcoded IP.** The device default used to be
+> `http://100.101.38.91` plus a `Host: barry.lan` header to select a Caddy site
+> block. That address is on the WORK tailnet, which the phone is not on, so the
+> device path was dead rather than merely out of date. The sidecar's DNS name is
+> stable, so there is no address to keep up to date.
+
+### App Transport Security
+
+The app sets **`NSAllowsLocalNetworking`**, not `NSAllowsArbitraryLoads`.
+
+The device path is genuine HTTPS and needs no exception at all. The one
+remaining cleartext caller is the *simulator*, which talks to the proxy on
+`http://127.0.0.1:9429` — and ATS blocks that unless permitted.
+`NSAllowsLocalNetworking` permits exactly loopback and link-local, and nothing
+routable, so a misconfigured `http://` tailnet URL still fails loudly instead of
+silently downgrading.
+
+### Test connection
+
+Settings probes rather than accepting a string. The user switches tailnets, so
+the failures that need different fixes must not collapse into one "failed"
+message: **wrong tailnet** (cannot resolve the host), **sidecar down** (resolved
+but cannot connect), and **secret wrong** (403 — which still proves the server
+is THERE) each get their own wording.
 
 No custom backend was written for this app — it is a client of the existing
 `servers/api` sessions/messages/WebSocket surface, the same one

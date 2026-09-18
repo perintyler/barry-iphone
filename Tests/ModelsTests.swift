@@ -150,9 +150,9 @@ final class ModelsTests: XCTestCase {
     }
 
     func testServerConfigWebSocketURL() {
-        let http = ServerConfig(baseURL: "http://127.0.0.1:9429", hostHeader: "", secret: "")
+        let http = ServerConfig(baseURL: "http://127.0.0.1:9429", secret: "")
         XCTAssertEqual(http.webSocketURL?.absoluteString, "ws://127.0.0.1:9429/api/v1/ws")
-        let https = ServerConfig(baseURL: "https://barry.works", hostHeader: "", secret: "")
+        let https = ServerConfig(baseURL: "https://barry.works", secret: "")
         XCTAssertEqual(https.webSocketURL?.absoluteString, "wss://barry.works/api/v1/ws")
     }
 
@@ -197,7 +197,7 @@ final class ModelsTests: XCTestCase {
 /// contract executable: they fail if the API's real shapes drift from the
 /// models. Skipped automatically when the API is unreachable.
 final class LiveAPITests: XCTestCase {
-    let config = ServerConfig(baseURL: "http://127.0.0.1:9429", hostHeader: "", secret: "")
+    let config = ServerConfig(baseURL: "http://127.0.0.1:9429", secret: "")
 
     private func requireServer() async throws {
         let client = BarryClient(config: config)

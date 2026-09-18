@@ -13,7 +13,8 @@ tests fail on the shape, and `LiveAPITests` fails on the live endpoint.
 |---|---|---|---|
 | Decoding | `Tests/ModelsTests.swift` (`ModelsTests`) | nothing (fixtures) | The `Codable` models match the API's real JSON field-for-field |
 | Integration | `Tests/ModelsTests.swift` (`LiveAPITests`) | live local API | Sessions/messages/repos endpoints are reachable and decode; sequence numbers are monotonic (the incremental-poll invariant the app relies on) |
-| UI, read paths | `UITests/BarryUITests.swift` | live local API, real simulator | Session list renders; opening a session renders its message history and shows a working input bar; Settings' "Test connection" round-trips `/health` |
+| UI, read paths | `UITests/BarryUITests.swift` | live local API, real simulator | Session list renders; opening a session renders its message history and shows a working input bar; Settings' "Test connection" reports a fully working connection |
+| Probe | `Tests/ConnectionProbeTests.swift` | `URLError` values, a stub, plus the real :4854 and :9429 | "Test connection" tells its failure modes apart |
 | UI, compose path | `UITests/BarryUITests.swift` (`testNewSessionSheetPopulatesFromRealAPI`) | live local API | The repo picker loads real repos and the Start button gates correctly — **does not submit**, on purpose (see below) |
 | UI, trait picker | `UITests/BarryUITests.swift` (`testTraitPickerMultiSelect`) | live local API | The trait picker loads the real trait catalog, tapping two rows leaves both checked (filled circle + accent row), and the New Session form's "Traits" row reflects the live count — does not submit |
 
@@ -90,11 +91,39 @@ just slow to become interactive under a heavy scroll/render load).
 
 Run these against a physical iPhone before considering a release "done":
 
-- [ ] Settings → set Tailscale IP + `barry.lan` host header → Test
-      connection succeeds from off-Mac-network (cellular, not just wifi)
+- [ ] **Set the secret in Settings.** Unlike the old proxy route, the device
+      path 403s without it. "Test connection" says so in those words.
+- [ ] **Turn Wi-Fi off.** Over cellular the app must still reach the Mac via
+      Tailscale at `https://barry-mac.tail5cb2f2.ts.net:8443`. This is the
+      difference between "the app works" and "the simulator's localhost works".
+- [ ] "Test connection" with a deliberately wrong host must say it cannot
+      RESOLVE the host, not merely "failed" — the point of the probe is that
+      wrong-tailnet and server-down do not look alike.
 - [ ] Send a real message to a real session; confirm it appears optimistically
       and reconciles with the server's copy once persisted
 - [ ] Background the app mid-stream, foreground it — polling should resume
       and catch up (no duplicate or dropped messages)
 - [ ] Dark mode — chat bubbles, tool rows, and status colors all stay legible
 - [ ] VoiceOver: session rows and the compose sheet read sensibly
+
+## The transport probe's negative controls
+
+Both were run and confirmed red, then reverted.
+
+| # | Check | Break it by | Confirmed result |
+|---|---|---|---|
+| 1 | a wrong tailnet and a dead sidecar differ | fold `.cannotFindHost` into the `.cannotConnect` case | `testWrongTailnetAndDownSidecarAreDifferentOutcomes` red: `("cannotConnect") is not equal to ("cannotResolveHost")`, and "a wrong tailnet and a dead sidecar must not read identically"; `testDNSFailureIsReportedAsAnUnresolvableHost` red too |
+| 2 | an unhealthy server is not blamed on the secret | delete the non-2xx check on `/health` in `ConnectionProbe.run` | `testAnUnhealthyServerIsNotBlamedOnTheSecret` red — the stub answers `/health` with 502 and the sessions route with 403, so without the health check the 403 wins and the probe blames the secret |
+
+The stub in control #2 answers the two routes with **different** statuses on
+purpose. A stub returning one status to both would leave the test green even
+with the health check deleted, because the sessions call would then produce the
+same 502 by itself — the "passing negative control" trap AGENTS.md describes.
+
+## Known-failing UI tests (pre-existing, not transport)
+
+`testGroupedToolRunExpandsAndCollapses`, `testJumpToBottomCanAppearAndBeTapped`
+and `testLongUserMessageCollapsesAndExpands` look up specific sessions by name
+(`barry-ios-app-setup`) in the live database. Those sessions have aged out of
+the first page, so the tests fail on a lookup, not on app behaviour. Confirmed
+by running them against the unmodified tree.

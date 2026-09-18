@@ -19,13 +19,16 @@ fi
 echo "==> Regenerating Xcode project from project.yml..."
 xcodegen generate
 
-echo "==> Clearing stale DerivedData for this project (avoids stale test-bundle bugs)..."
-rm -rf "$HOME/Library/Developer/Xcode/DerivedData/${SCHEME}-"*
-
 echo "==> Running full test suite on simulator: ${SIM_NAME}..."
 set +e
+# -derivedDataPath pins the output where `barry ios build` also writes. Without
+# it xcodebuild uses Xcode's shared DerivedData, and `simctl install` from the
+# other path silently installs a STALE app — which cost three rounds of
+# screenshots in a sibling bag chasing a feature that was never in the binary
+# under test.
 xcodebuild -project "${SCHEME}.xcodeproj" -scheme "${SCHEME}" \
   -destination "platform=iOS Simulator,name=${SIM_NAME}" \
+  -derivedDataPath .build-barry-ios \
   test 2>&1 | tee /tmp/barry-iphone-test.log \
   | grep -E "Test Case|Test Suite '(All tests|${SCHEME}Tests\.xctest|${SCHEME}UITests\.xctest)'|error:|\*\* TEST"
 STATUS=${PIPESTATUS[0]}
@@ -33,7 +36,9 @@ set -e
 
 echo ""
 if [ "$STATUS" -eq 0 ]; then
-  echo "✅ All tests passed."
+  # A skip reads identically to a pass in the summary line, so say the count out
+  # loud rather than letting a suite that ran nothing look green.
+  echo "✅ All tests passed. Skipped: $(grep -c 'was skipped' /tmp/barry-iphone-test.log)"
 else
   echo "❌ Tests failed. Full log: /tmp/barry-iphone-test.log"
   echo "   To inspect a UI test failure visually, see QA.md § Debugging a UI test failure."
