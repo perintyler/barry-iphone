@@ -1,94 +1,100 @@
 import SwiftUI
 
-/// Full-screen model picker for the currently selected provider. Loads
-/// the real catalog from GET /api/v1/models — never a hardcoded list, so
-/// it can't silently drift from what the server actually supports.
-///
-/// "Inherit" is always the first row and is a real, selectable option
-/// (nil model id), not a placeholder state — selecting it is how the
-/// session ends up using the resolved default shown in its subtitle.
 struct ModelPickerView: View {
-    let provider: ProviderId
+    let provider: String
     @Binding var selection: String?
     let resolvedDefaultModel: String?
+    let catalog: ModelsResponse?
+    let loadError: String?
     @Environment(\.dismiss) private var dismiss
+    @State private var query = ""
 
-    @State private var models: [ModelOption] = []
-    @State private var loadError: String?
-    @EnvironmentObject private var store: AppStore
+    private var providerModels: ProviderModels? { catalog?.providers[provider] }
+
+    private var matches: [ModelOption] {
+        let models = providerModels?.models ?? []
+        guard !query.isEmpty else { return models }
+        return models.filter {
+            $0.id.localizedCaseInsensitiveContains(query)
+                || $0.label.localizedCaseInsensitiveContains(query)
+        }
+    }
 
     var body: some View {
         NavigationStack {
             Group {
-                if let loadError {
-                    ContentUnavailableView {
-                        Label("Couldn't load models", systemImage: "exclamationmark.triangle")
-                    } description: {
-                        Text(loadError)
-                    }
-                } else {
+                if let providerModels {
                     List {
-                        Button {
-                            selection = nil
-                            dismiss()
-                        } label: {
-                            row(
-                                title: "Inherit",
-                                subtitle: resolvedDefaultModel.map { "Resolves to \($0)" } ?? "Account or repo default",
-                                isSelected: selection == nil
-                            )
+                        if providerModels.stale == true || providerModels.source != "live" {
+                            Section {
+                                Label("This is Barry's saved list. It may omit models available from \(catalog?.label(for: provider) ?? provider). Search to enter another model ID.",
+                                      systemImage: "info.circle")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
-                        .buttonStyle(.plain)
-                        .listRowBackground(selection == nil ? Theme.accent.opacity(0.08) : Color.clear)
 
-                        ForEach(models) { model in
+                        Section {
                             Button {
-                                selection = model.id
+                                selection = nil
                                 dismiss()
                             } label: {
-                                row(title: model.label, subtitle: model.id, isSelected: selection == model.id)
+                                row(title: "Inherit", subtitle: "Uses \(resolvedDefaultModel ?? providerModels.defaultModel ?? "the provider default")",
+                                    note: nil, isSelected: selection == nil)
                             }
                             .buttonStyle(.plain)
-                            .listRowBackground(selection == model.id ? Theme.accent.opacity(0.08) : Color.clear)
+                        }
+
+                        Section("Available models") {
+                            ForEach(matches) { model in
+                                Button {
+                                    selection = model.id
+                                    dismiss()
+                                } label: {
+                                    row(title: model.label, subtitle: model.id, note: model.note,
+                                        isSelected: selection == model.id)
+                                }
+                                .buttonStyle(.plain)
+                            }
+
+                            let customID = query.trimmingCharacters(in: .whitespacesAndNewlines)
+                            if !customID.isEmpty && !providerModels.models.contains(where: { $0.id == customID }) {
+                                Button("Use model ID “\(customID)”") {
+                                    selection = customID
+                                    dismiss()
+                                }
+                            }
                         }
                     }
-                    .listStyle(.plain)
+                    .searchable(text: $query, prompt: "Search models or enter an ID")
+                } else {
+                    ContentUnavailableView {
+                        Label("Models unavailable", systemImage: "exclamationmark.triangle")
+                    } description: {
+                        Text(loadError ?? "Loading the model catalog…")
+                    }
                 }
             }
-            .navigationTitle("\(provider.displayName) Models")
+            .navigationTitle("\(catalog?.label(for: provider) ?? provider) Models")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
             }
-            .task {
-                do {
-                    let response = try await store.client.models()
-                    models = response.models(for: provider)
-                } catch {
-                    loadError = error.localizedDescription
-                }
-            }
         }
     }
 
-    private func row(title: String, subtitle: String, isSelected: Bool) -> some View {
+    private func row(title: String, subtitle: String, note: String?, isSelected: Bool) -> some View {
         HStack {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(isSelected ? Theme.accent : .primary)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .monospaced()
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.body.weight(.semibold)).foregroundStyle(.primary)
+                Text(subtitle).font(.caption).foregroundStyle(.secondary).monospaced()
+                if let note { Text(note).font(.caption).foregroundStyle(.orange) }
             }
             Spacer()
             if isSelected {
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.accent)
-            } else {
-                Image(systemName: "circle").foregroundStyle(.tertiary.opacity(0.5))
             }
         }
         .padding(.vertical, 2)

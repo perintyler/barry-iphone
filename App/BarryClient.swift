@@ -116,8 +116,9 @@ struct BarryClient {
         try await get(ReposPage.self, path: "/api/v1/repos").repos
     }
 
-    func models() async throws -> ModelsResponse {
-        try await get(ModelsResponse.self, path: "/api/v1/models")
+    func models(repoPath: String? = nil) async throws -> ModelsResponse {
+        try await get(ModelsResponse.self, path: "/api/v1/models",
+                      query: repoPath.map { [URLQueryItem(name: "repoPath", value: $0)] } ?? [])
     }
 
     /// All traits a session can be granted. Zero traits is a fully valid

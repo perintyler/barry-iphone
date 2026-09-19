@@ -16,10 +16,12 @@ struct NewSessionView: View {
     @State private var creating = false
     @State private var error: String?
 
-    @State private var selectedProvider: ProviderId?
+    @State private var selectedProvider: String?
     @State private var selectedModel: String?
-    @State private var resolvedDefaultProvider: ProviderId = .claude
+    @State private var resolvedDefaultProvider = "claude"
     @State private var resolvedDefaultModel: String?
+    @State private var modelCatalog: ModelsResponse?
+    @State private var modelCatalogError: String?
     @State private var showProviderPicker = false
     @State private var showModelPicker = false
 
@@ -31,7 +33,7 @@ struct NewSessionView: View {
 
     /// What the form displays and what actually gets sent — an explicit
     /// choice if the user made one, otherwise the real resolved default.
-    private var effectiveProvider: ProviderId { selectedProvider ?? resolvedDefaultProvider }
+    private var effectiveProvider: String { selectedProvider ?? resolvedDefaultProvider }
 
     var body: some View {
         NavigationStack {
@@ -60,7 +62,7 @@ struct NewSessionView: View {
                         HStack {
                             Text("Provider").foregroundStyle(.primary)
                             Spacer()
-                            Text(effectiveProvider.displayName)
+                            Text(modelCatalog?.label(for: effectiveProvider) ?? effectiveProvider.capitalized)
                                 .foregroundStyle(.secondary)
                             Image(systemName: "chevron.right")
                                 .font(.caption)
@@ -112,15 +114,22 @@ struct NewSessionView: View {
             }
             .sheet(isPresented: $showProviderPicker) {
                 ProviderPickerView(
-                    selection: Binding(get: { effectiveProvider }, set: { selectedProvider = $0 }),
-                    defaultProvider: resolvedDefaultProvider
+                    selection: Binding(get: { effectiveProvider }, set: { provider in
+                        if provider != effectiveProvider { selectedModel = nil }
+                        selectedProvider = provider
+                    }),
+                    defaultProvider: resolvedDefaultProvider,
+                    catalog: modelCatalog,
+                    loadError: modelCatalogError
                 )
             }
             .sheet(isPresented: $showModelPicker) {
                 ModelPickerView(
                     provider: effectiveProvider,
                     selection: $selectedModel,
-                    resolvedDefaultModel: resolvedDefaultModel
+                    resolvedDefaultModel: effectiveProvider == resolvedDefaultProvider ? resolvedDefaultModel : nil,
+                    catalog: modelCatalog,
+                    loadError: modelCatalogError
                 )
                 .environmentObject(store)
             }
@@ -132,9 +141,16 @@ struct NewSessionView: View {
                 repos = (try? await store.client.repos()) ?? []
                 if selectedRepoPath == nil { selectedRepoPath = repos.first?.path }
                 await resolveDefaults()
+                await loadModels()
             }
-            .onChange(of: selectedRepoPath) { _, _ in
-                Task { await resolveDefaults() }
+            .onChange(of: selectedRepoPath) { previous, _ in
+                guard previous != nil else { return }
+                selectedModel = nil
+                modelCatalog = nil
+                Task {
+                    await resolveDefaults()
+                    await loadModels()
+                }
             }
             // An alert, not an inline Form section: the prior inline error
             // rendered at the BOTTOM of the form, below Repository/First
@@ -160,7 +176,10 @@ struct NewSessionView: View {
     /// hasn't completed yet, or the explicit override once one is picked.
     private var modelRowValue: String {
         if let selectedModel { return selectedModel }
-        return resolvedDefaultModel ?? "Default"
+        if effectiveProvider == resolvedDefaultProvider {
+            return resolvedDefaultModel ?? modelCatalog?.providers[effectiveProvider]?.defaultModel ?? "Provider default"
+        }
+        return modelCatalog?.providers[effectiveProvider]?.defaultModel ?? "Provider default"
     }
 
     /// "None" with zero picked (the normal starting state, not an error),
@@ -179,14 +198,27 @@ struct NewSessionView: View {
         guard let repoPath = selectedRepoPath else { return }
         do {
             let effective = try await store.client.effectiveIdentity(repoPath: repoPath)
+            if selectedProvider == nil && resolvedDefaultProvider != effective.defaultProvider {
+                selectedModel = nil
+            }
             resolvedDefaultProvider = effective.defaultProvider
             resolvedDefaultModel = effective.identity.defaultModel
         } catch {
             // Resolution failing shouldn't block starting a session — the
             // form still works with "Claude" / "Default" shown, same as
             // before this feature existed.
-            resolvedDefaultProvider = .claude
+            resolvedDefaultProvider = "claude"
             resolvedDefaultModel = nil
+        }
+    }
+
+    private func loadModels() async {
+        guard let selectedRepoPath else { return }
+        do {
+            modelCatalog = try await store.client.models(repoPath: selectedRepoPath)
+            modelCatalogError = nil
+        } catch {
+            modelCatalogError = error.localizedDescription
         }
     }
 
@@ -199,7 +231,7 @@ struct NewSessionView: View {
                 repoPath: repoPath,
                 systemPrompt: prompt,
                 name: nil,
-                provider: selectedProvider?.rawValue,
+                provider: selectedProvider,
                 model: selectedModel,
                 traits: Array(selectedTraits)
             )
