@@ -45,7 +45,11 @@ final class AppStore: ObservableObject {
         do {
             let page = try await client.sessions(cursor: cursor)
             let known = Set(sessions.map(\.id))
-            sessions.append(contentsOf: page.sessions.filter { !known.contains($0.id) })
+            // Re-sort the whole list, never just append: the appended page is
+            // in server order, and dropping it on the end unsorted made time
+            // run BACKWARDS across the page seam (row 51 older than row 52).
+            sessions = (sessions + page.sessions.filter { !known.contains($0.id) })
+                .sorted { sortKey($0) > sortKey($1) }
             nextCursor = page.nextCursor
         } catch {
             // Keep the list we have; pagination can retry on next scroll.

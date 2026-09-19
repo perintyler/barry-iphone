@@ -172,36 +172,66 @@ struct ReposPage: Decodable {
 
 // MARK: - Providers & Models
 
+/// All providers Barry can run a session with, in a fixed, deliberate
+/// display order (not alphabetical) — Claude first as the default, the
+/// rest roughly by how established they are.
+enum ProviderId: String, CaseIterable, Identifiable {
+    case claude, codex, opencode, cursor, zai, ollama
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .claude: return "Claude"
+        case .codex: return "Codex"
+        case .opencode: return "OpenCode"
+        case .cursor: return "Cursor"
+        case .zai: return "Z.ai"
+        case .ollama: return "Ollama"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .claude: return "Default — used when nothing else is set"
+        case .codex: return "OpenAI's coding agent"
+        case .opencode: return "Open-source, model-agnostic"
+        case .cursor: return "Cursor CLI agent"
+        case .zai: return "GLM-based coding agent"
+        case .ollama: return "Local models on this Mac"
+        }
+    }
+
+    /// Short badge letter(s) for the row icon — not a real logo, just a
+    /// consistent per-provider chip so rows are scannable at a glance.
+    var badge: String {
+        switch self {
+        case .claude: return "C"
+        case .codex: return "X"
+        case .opencode: return "O"
+        case .cursor: return "Cu"
+        case .zai: return "Z"
+        case .ollama: return "Ol"
+        }
+    }
+}
+
 /// One selectable model from GET /api/v1/models.
 struct ModelOption: Decodable, Equatable, Identifiable {
     let id: String
     let label: String
-    let note: String?
 }
 
 /// Per-provider model catalog from GET /api/v1/models.
 struct ProviderModels: Decodable {
-    let label: String?
-    let defaultModel: String?
     let models: [ModelOption]
-    let stale: Bool?
-    let source: String?
-
-    enum CodingKeys: String, CodingKey {
-        case label, models, stale, source
-        case defaultModel = "default"
-    }
 }
 
 struct ModelsResponse: Decodable {
     let providers: [String: ProviderModels]
 
-    var providerIDs: [String] {
-        providers.keys.sorted()
-    }
-
-    func label(for provider: String) -> String {
-        providers[provider]?.label ?? provider.capitalized
+    func models(for provider: ProviderId) -> [ModelOption] {
+        providers[provider.rawValue]?.models ?? []
     }
 }
 
@@ -216,8 +246,8 @@ struct EffectiveIdentity: Decodable {
         let defaultModel: String?
     }
 
-    var defaultProvider: String {
-        identity.defaultCodingAgent ?? "claude"
+    var defaultProvider: ProviderId {
+        identity.defaultCodingAgent.flatMap(ProviderId.init(rawValue:)) ?? .claude
     }
 }
 

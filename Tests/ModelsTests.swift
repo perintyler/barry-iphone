@@ -102,7 +102,7 @@ final class ModelsTests: XCTestCase {
         let effective = try JSONDecoder().decode(EffectiveIdentity.self, from: Data(json.utf8))
         XCTAssertEqual(effective.identity.defaultCodingAgent, "cursor")
         XCTAssertEqual(effective.identity.defaultModel, "claude-opus-5")
-        XCTAssertEqual(effective.defaultProvider, "cursor")
+        XCTAssertEqual(effective.defaultProvider, .cursor)
     }
 
     /// Regression: defaultProvider originally referenced defaultCodingAgent
@@ -115,7 +115,7 @@ final class ModelsTests: XCTestCase {
         "defaultCodingAgent":null,"defaultModel":null},"source":"global","repoRoot":null}
         """
         let effective = try JSONDecoder().decode(EffectiveIdentity.self, from: Data(json.utf8))
-        XCTAssertEqual(effective.defaultProvider, "claude")
+        XCTAssertEqual(effective.defaultProvider, .claude)
         XCTAssertNil(effective.identity.defaultModel)
     }
 
@@ -126,28 +126,10 @@ final class ModelsTests: XCTestCase {
         "codex":{"default":null,"small":null,"models":[{"id":"gpt-5.6-sol","label":"GPT-5.6 Sol"}]}}}
         """
         let response = try JSONDecoder().decode(ModelsResponse.self, from: Data(json.utf8))
-        XCTAssertEqual(response.providers["claude"]?.models.count, 2)
-        XCTAssertEqual(response.providers["claude"]?.models.first?.id, "claude-opus-5")
-        XCTAssertEqual(response.providers["codex"]?.models.count, 1)
-        XCTAssertEqual(response.providerIDs, ["claude", "codex"])
-        XCTAssertNil(response.providers["ollama"])
-    }
-
-    func testProviderCatalogIncludesServerProvidersAndKeepsModelsSeparate() throws {
-        let json = """
-        {"providers":{
-          "claude":{"label":"Claude","source":"curated","default":null,
-            "models":[{"id":"claude-opus-5","label":"Opus 5"}]},
-          "future":{"label":"Future agent","source":"live","stale":false,
-            "models":[{"id":"future-one","label":"Future One","note":"Limited access"}]}
-        }}
-        """
-        let response = try JSONDecoder().decode(ModelsResponse.self, from: Data(json.utf8))
-        XCTAssertEqual(response.providerIDs, ["claude", "future"])
-        XCTAssertEqual(response.label(for: "future"), "Future agent")
-        XCTAssertEqual(response.providers["future"]?.models.map(\.id), ["future-one"])
-        XCTAssertEqual(response.providers["future"]?.models.first?.note, "Limited access")
-        XCTAssertEqual(response.providers["claude"]?.models.map(\.id), ["claude-opus-5"])
+        XCTAssertEqual(response.models(for: .claude).count, 2)
+        XCTAssertEqual(response.models(for: .claude).first?.id, "claude-opus-5")
+        XCTAssertEqual(response.models(for: .codex).count, 1)
+        XCTAssertTrue(response.models(for: .ollama).isEmpty, "unlisted provider should yield an empty list, not crash")
     }
 
     func testDecodesTraitsResponse() throws {
@@ -267,7 +249,7 @@ final class LiveAPITests: XCTestCase {
     func testFetchesRealModelsForClaude() async throws {
         try await requireServer()
         let response = try await BarryClient(config: config).models()
-        let claudeModels = response.providers["claude"]?.models ?? []
+        let claudeModels = response.models(for: .claude)
         XCTAssertFalse(claudeModels.isEmpty, "expected at least one real Claude model")
         XCTAssertTrue(claudeModels.allSatisfy { !$0.id.isEmpty && !$0.label.isEmpty })
     }
@@ -288,7 +270,7 @@ final class LiveAPITests: XCTestCase {
         let effective = try await client.effectiveIdentity(repoPath: repo.path)
         // defaultProvider always resolves to something real, even if the
         // server returns no explicit defaultCodingAgent (falls back to .claude).
-        XCTAssertFalse(effective.defaultProvider.isEmpty)
+        XCTAssertTrue(ProviderId.allCases.contains(effective.defaultProvider))
     }
 
     /// because no test exercised the actual network call. This creates one

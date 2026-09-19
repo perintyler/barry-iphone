@@ -89,6 +89,33 @@ just slow to become interactive under a heavy scroll/render load).
 
 ## Manual checks (not automatable without a device / real send)
 
+### Message delivery across providers
+
+Use disposable draft sessions in a scratch repo. Repeat this sequence for
+**Claude Code, Codex, and Cursor** on a physical iPhone (and once in the
+simulator, to separate device networking from API behavior):
+
+1. Choose the provider when creating a draft, send a unique first message,
+   and confirm the API returns success and the message appears exactly once
+   in `GET /api/v1/sessions/:id/messages` with role `user`.
+2. Wait for a provider reply, then send a unique follow-up. Confirm its user
+   row and a new assistant reply. Check that the session metadata still names
+   the chosen provider.
+3. Fill the API's resident budget with **idle** disposable sessions, then
+   send to another draft. It must succeed while an idle session is closed to
+   free capacity. Repeat while all slots are actively streaming: the API
+   should report capacity failure, and the app should show the error rather
+   than claiming the message was sent.
+4. Background the app immediately after a send and reopen it. Confirm the
+   server copy replaces the optimistic row without a duplicate. Repeat after
+   restarting the API between turns; the follow-up must resume from stored
+   history.
+
+The API's `sdk-manager.test.ts` runs the idle-capacity admission path for all
+three providers with a controllable provider stream. Break idle eviction to
+confirm those tests fail. This does not prove a real provider CLI, device
+network, or persisted reply works; the checks above cover those boundaries.
+
 Run these against a physical iPhone before considering a release "done":
 
 - [ ] **Set the secret in Settings.** Unlike the old proxy route, the device

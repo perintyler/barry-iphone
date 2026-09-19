@@ -76,6 +76,10 @@ struct BarryClient {
         var query = [
             URLQueryItem(name: "limit", value: String(limit)),
             URLQueryItem(name: "hasMessages", value: "true"),
+            // Page by activity, not creation time. Without this the server
+            // picks the 50 most recently CREATED sessions and no amount of
+            // local sorting can surface a session revived after a quiet spell.
+            URLQueryItem(name: "order", value: "activity"),
         ]
         if let cursor { query.append(URLQueryItem(name: "cursor", value: cursor)) }
         return try await get(SessionsPage.self, path: "/api/v1/sessions", query: query)
@@ -107,18 +111,20 @@ struct BarryClient {
     }
 
     /// Send a message. Starts the session server-side if it is not active.
-    func sendMessage(sessionId: String, content: String) async throws {
+    func sendMessage(sessionId: String, content: String, clientMessageId: String) async throws {
         struct Ack: Decodable { let ok: Bool }
-        _ = try await post(Ack.self, path: "/api/v1/sessions/\(sessionId)/message", body: ["content": content])
+        _ = try await post(Ack.self, path: "/api/v1/sessions/\(sessionId)/message", body: [
+            "content": content,
+            "clientMessageId": clientMessageId,
+        ])
     }
 
     func repos() async throws -> [Repo] {
         try await get(ReposPage.self, path: "/api/v1/repos").repos
     }
 
-    func models(repoPath: String? = nil) async throws -> ModelsResponse {
-        try await get(ModelsResponse.self, path: "/api/v1/models",
-                      query: repoPath.map { [URLQueryItem(name: "repoPath", value: $0)] } ?? [])
+    func models() async throws -> ModelsResponse {
+        try await get(ModelsResponse.self, path: "/api/v1/models")
     }
 
     /// All traits a session can be granted. Zero traits is a fully valid

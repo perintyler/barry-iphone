@@ -15,11 +15,7 @@ a phone.
   session server-side if it isn't already active.
 - Starts new sessions against a repo Barry already knows about
   (`POST /sessions/draft` + an initial message), with optional provider,
-  model, and trait overrides. Provider choices and each provider's models
-  come from `GET /api/v1/models?repoPath=…`; the model picker shows only the selected
-  provider's entries, and changing provider clears the previous model.
-  When Barry has only a saved list, the picker says so and accepts a model ID
-  that is not listed. Traits are picked from the real
+  model, and trait overrides -- traits picked from the real
   `GET /api/v1/traits` catalog, multi-select, none required.
 - Live-ish updates: a WebSocket subscription drives instant streaming
   previews and "poll now" nudges; a REST poll (2.5s) is the source of

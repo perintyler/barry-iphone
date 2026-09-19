@@ -4,6 +4,7 @@ struct ChatView: View {
     @EnvironmentObject private var store: AppStore
     @StateObject private var chat: ChatStore
     @State private var draft = ""
+    @State private var failedSend: (text: String, id: String)?
     @FocusState private var inputFocused: Bool
     @StateObject private var visibility = VisibleUserMessages()
 
@@ -105,6 +106,12 @@ struct ChatView: View {
                         }
                         ForEach(chat.pendingSends, id: \.self) { text in
                             UserMessageRow(text: text, pending: true)
+                        }
+                        if let error = chat.loadError, !chat.messages.isEmpty {
+                            Text(error)
+                                .font(.footnote)
+                                .foregroundStyle(.red)
+                                .accessibilityIdentifier("messageError")
                         }
                         if !chat.streamingText.isEmpty {
                             AssistantText(streaming: chat.streamingText)
@@ -234,8 +241,15 @@ struct ChatView: View {
                 .accessibilityIdentifier("messageInput")
             Button {
                 let text = draft
+                let id = failedSend.flatMap { $0.text == text ? $0.id : nil } ?? UUID().uuidString
                 draft = ""
-                Task { await chat.send(text) }
+                failedSend = nil
+                Task {
+                    if !(await chat.send(text, clientMessageId: id)) {
+                        failedSend = (text, id)
+                        if draft.isEmpty { draft = text }
+                    }
+                }
             } label: {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 30))

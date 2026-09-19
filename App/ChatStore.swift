@@ -145,18 +145,21 @@ final class ChatStore: ObservableObject {
         }
     }
 
-    func send(_ text: String) async {
+    func send(_ text: String, clientMessageId: String) async -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty else { return false }
         pendingSends.append(trimmed)
         isWorking = true
+        loadError = nil
         do {
-            try await client.sendMessage(sessionId: session.id, content: trimmed)
+            try await client.sendMessage(sessionId: session.id, content: trimmed, clientMessageId: clientMessageId)
             await pollNewer()
+            return true
         } catch {
             pendingSends.removeAll { $0 == trimmed }
             isWorking = false
             loadError = error.localizedDescription
+            return false
         }
     }
 
